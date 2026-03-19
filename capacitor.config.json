@@ -7,6 +7,10 @@
     "cleartext": true
   },
   "android": {
-    "minSdkVersion": 23
+    "minSdkVersion": 23,
+    "orientation": "landscape"
+  },
+  "ios": {
+    "orientation": "landscape"
   }
 }
