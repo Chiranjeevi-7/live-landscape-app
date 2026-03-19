@@ -1,0 +1,12 @@
+{
+  "appId": "app.lovable.158eee2968d44f92b2f96f84e82c5161",
+  "appName": "See It Live",
+  "webDir": "dist",
+  "server": {
+    "url": "https://158eee29-68d4-4f92-b2f9-6f84e82c5161.lovableproject.com?forceHideBadge=true",
+    "cleartext": true
+  },
+  "android": {
+    "minSdkVersion": 23
+  }
+}
