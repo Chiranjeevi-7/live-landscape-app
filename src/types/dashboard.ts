@@ -1,4 +1,4 @@
-export type WidgetType = 'clock' | 'date' | 'timer' | 'stopwatch' | 'spotify' | 'lyrics' | 'gif' | 'weather' | 'pomodoro' | 'notes';
+export type WidgetType = 'clock' | 'date' | 'timer' | 'stopwatch' | 'spotify' | 'lyrics' | 'gif' | 'weather' | 'pomodoro' | 'notes' | 'system';
 
 export type WidgetShape = 'rectangle' | 'rounded' | 'squircle' | 'circle' | 'edge-to-edge';
 
