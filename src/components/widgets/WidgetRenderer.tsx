@@ -9,7 +9,6 @@ import GifWidget from './GifWidget';
 import WeatherWidget from './WeatherWidget';
 import PomodoroWidget from './PomodoroWidget';
 import NotesWidget from './NotesWidget';
-import SystemStatsWidget from './SystemStatsWidget';
 
 const WIDGET_MAP: Record<WidgetType, React.ComponentType> = {
   clock: ClockWidget,
@@ -22,7 +21,6 @@ const WIDGET_MAP: Record<WidgetType, React.ComponentType> = {
   weather: WeatherWidget,
   pomodoro: PomodoroWidget,
   notes: NotesWidget,
-  system: SystemStatsWidget,
 };
 
 export default function WidgetRenderer({ type }: { type: WidgetType }) {
