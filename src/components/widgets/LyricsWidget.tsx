@@ -6,10 +6,9 @@ export default function LyricsWidget() {
 
   return (
     <div className="flex flex-col items-center justify-center h-full w-full gap-3 p-4">
-      <span className="t-label">Lyrics</span>
-      <Music className="w-8 h-8 text-muted-foreground" />
+      <Music className="w-6 h-6 text-muted-foreground/50" />
       <span className="text-sm text-muted-foreground text-center">
-        {connected ? 'No track playing' : 'Connect Spotify to see lyrics'}
+        {connected ? 'No track playing' : 'Connect Spotify for lyrics'}
       </span>
     </div>
   );
