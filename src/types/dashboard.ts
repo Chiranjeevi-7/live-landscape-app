@@ -68,7 +68,10 @@ export const WIDGET_LABELS: Record<WidgetType, string> = {
   weather: 'Weather',
   pomodoro: 'Pomodoro',
   notes: 'Notes / Todo',
+  system: 'System Stats',
 };
+
+export const ESSENTIAL_WIDGETS: WidgetType[] = ['clock', 'date', 'pomodoro', 'notes'];
 
 export const SHAPE_LABELS: Record<WidgetShape, string> = {
   'rectangle': 'Sharp',

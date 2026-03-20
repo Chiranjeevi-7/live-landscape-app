@@ -3,7 +3,10 @@ import { useDashboardStore } from '@/hooks/useDashboardStore';
 import AmbientVisualizer from '@/components/AmbientVisualizer';
 import FreeformCanvas from '@/components/FreeformCanvas';
 import WidgetPicker from '@/components/WidgetPicker';
-import { Palette, Paintbrush, Lock, Unlock, Plus } from 'lucide-react';
+import AICompanionPanel from '@/components/AICompanionPanel';
+import FocusModeOverlay from '@/components/FocusModeOverlay';
+import { Palette, Paintbrush, Lock, Unlock, Plus, Bot, Sun, Moon, Focus } from 'lucide-react';
+import { ESSENTIAL_WIDGETS } from '@/types/dashboard';
 
 export default function Dashboard() {
   const { layout, accentIndex, updateWidget, addWidget, removeWidget, cycleTheme, cycleAccent } = useDashboardStore();
@@ -11,6 +14,9 @@ export default function Dashboard() {
   const [editMode, setEditMode] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const [dimmed, setDimmed] = useState(false);
+  const [showAI, setShowAI] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
+  const [lightMode, setLightMode] = useState(false);
   const uiTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Wake lock
@@ -37,6 +43,11 @@ export default function Dashboard() {
     return () => clearInterval(id);
   }, []);
 
+  // Light/dark mode
+  useEffect(() => {
+    document.documentElement.classList.toggle('light-mode', lightMode);
+  }, [lightMode]);
+
   const handleTap = useCallback(() => {
     if (editMode) return;
     setShowUI(true);
@@ -44,28 +55,44 @@ export default function Dashboard() {
     uiTimeout.current = setTimeout(() => setShowUI(false), 3000);
   }, [editMode]);
 
+  // Focus mode: filter to essential widgets only
+  const visibleWidgets = focusMode
+    ? layout.widgets.filter(w => ESSENTIAL_WIDGETS.includes(w.type))
+    : layout.widgets;
+
   return (
-    <div className={`fixed inset-0 bg-background overflow-hidden ${dimmed ? 'auto-dimmed' : ''}`} onClick={handleTap}>
+    <div className={`fixed inset-0 bg-background overflow-hidden transition-all duration-700 ${dimmed ? 'auto-dimmed' : ''}`} onClick={handleTap}>
       <AmbientVisualizer accentIndex={accentIndex} />
+      <FocusModeOverlay isFocused={focusMode} onToggle={() => setFocusMode(f => !f)} />
 
       {/* Edit mode indicator */}
       {editMode && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 overlay-pill px-4 py-2 text-xs text-foreground/80">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 overlay-pill px-4 py-2 text-xs text-foreground/80 animate-fade-in">
           Edit Mode — Drag to move, corners to resize
         </div>
       )}
 
       {/* Free-form canvas */}
-      <FreeformCanvas widgets={layout.widgets} editMode={editMode} onUpdate={updateWidget} onRemove={removeWidget} />
+      <div className={`transition-all duration-700 ${focusMode ? 'scale-[1.02]' : ''}`}>
+        <FreeformCanvas widgets={visibleWidgets} editMode={editMode} onUpdate={updateWidget} onRemove={removeWidget} />
+      </div>
 
       {/* Control bar */}
-      <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ${showUI || editMode ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
-        <div className="overlay-pill flex items-center gap-2">
-          <button onClick={(e) => { e.stopPropagation(); cycleTheme(); }} className="btn-pill flex items-center gap-1.5 py-2 px-3">
-            <Palette className="w-4 h-4" /> Theme
+      <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ${showUI || editMode ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+        <div className="overlay-pill flex items-center gap-1.5">
+          <button onClick={(e) => { e.stopPropagation(); cycleTheme(); }} className="btn-pill flex items-center gap-1.5 py-2 px-3 group">
+            <Palette className="w-4 h-4 transition-transform group-hover:rotate-45" /> Theme
           </button>
-          <button onClick={(e) => { e.stopPropagation(); cycleAccent(); }} className="btn-pill flex items-center gap-1.5 py-2 px-3">
-            <Paintbrush className="w-4 h-4" /> Color
+          <button onClick={(e) => { e.stopPropagation(); cycleAccent(); }} className="btn-pill flex items-center gap-1.5 py-2 px-3 group">
+            <Paintbrush className="w-4 h-4 transition-transform group-hover:scale-110" /> Color
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); setLightMode(l => !l); }} className="btn-pill flex items-center gap-1.5 py-2 px-3 group">
+            {lightMode ? <Moon className="w-4 h-4 transition-transform group-hover:rotate-12" /> : <Sun className="w-4 h-4 transition-transform group-hover:rotate-90" />}
+            {lightMode ? 'Dark' : 'Light'}
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); setFocusMode(f => !f); }} className="btn-pill flex items-center gap-1.5 py-2 px-3"
+            style={focusMode ? { background: 'hsl(var(--accent) / 0.15)', borderColor: 'hsl(var(--accent) / 0.4)' } : {}}>
+            <Focus className="w-4 h-4" /> Focus
           </button>
           <button onClick={(e) => { e.stopPropagation(); setEditMode(!editMode); if (editMode) setShowPicker(false); }} className="btn-pill flex items-center gap-1.5 py-2 px-3" style={editMode ? { background: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' } : {}}>
             {editMode ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
@@ -76,11 +103,18 @@ export default function Dashboard() {
               <Plus className="w-4 h-4" /> Add
             </button>
           )}
+          <div className="w-px h-6 mx-1" style={{ background: 'hsl(var(--border))' }} />
+          <button onClick={(e) => { e.stopPropagation(); setShowAI(!showAI); }} className="btn-pill flex items-center gap-1.5 py-2 px-3"
+            style={showAI ? { background: 'hsl(var(--accent) / 0.2)', borderColor: 'hsl(var(--accent) / 0.4)' } : {}}>
+            <Bot className="w-4 h-4" /> AI
+          </button>
         </div>
       </div>
+
       {showPicker && (
         <WidgetPicker onAdd={(widget) => { addWidget(widget); setShowPicker(false); }} onClose={() => setShowPicker(false)} />
       )}
+      <AICompanionPanel isOpen={showAI} onClose={() => setShowAI(false)} />
     </div>
   );
 }
