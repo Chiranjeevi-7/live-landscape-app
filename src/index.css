@@ -259,6 +259,12 @@
     background: hsl(var(--surface-hover, var(--surface-bright)));
     border-color: hsl(var(--accent) / 0.3);
     box-shadow: 0 0 12px hsl(var(--accent-glow));
+    transform: translateY(-1px);
+  }
+
+  .btn-pill:active {
+    transform: scale(0.95);
+    transition-duration: 0.1s;
   }
 
   .progress-track {
