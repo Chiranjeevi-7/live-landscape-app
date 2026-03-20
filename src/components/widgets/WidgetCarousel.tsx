@@ -1,7 +1,6 @@
-import { useState, useRef, useCallback } from 'react';
+import { useRef, useCallback } from 'react';
 import type { WidgetType, SubWidget } from '@/types/dashboard';
 import WidgetRenderer from './WidgetRenderer';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Props {
   mainType: WidgetType;
@@ -12,108 +11,67 @@ interface Props {
 }
 
 export default function WidgetCarousel({ mainType, subWidgets, activeIndex, onIndexChange, editMode }: Props) {
-  const touchStartX = useRef<number | null>(null);
-  const touchDeltaX = useRef(0);
-  const [swiping, setSwiping] = useState(false);
+  const touchX = useRef<number | null>(null);
+  const delta = useRef(0);
 
-  const allTypes: WidgetType[] = [mainType, ...(subWidgets?.map(sw => sw.type) || [])];
-  const total = allTypes.length;
-  const currentIndex = Math.min(activeIndex, total - 1);
+  const all: WidgetType[] = [mainType, ...(subWidgets?.map(s => s.type) || [])];
+  const total = all.length;
+  const idx = Math.min(activeIndex, total - 1);
 
-  const goTo = useCallback((idx: number) => {
-    const clamped = Math.max(0, Math.min(total - 1, idx));
-    onIndexChange(clamped);
-  }, [total, onIndexChange]);
+  const go = useCallback((i: number) => onIndexChange(Math.max(0, Math.min(total - 1, i))), [total, onIndexChange]);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (editMode) return;
-    touchStartX.current = e.touches[0].clientX;
-    touchDeltaX.current = 0;
-    setSwiping(true);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (touchStartX.current === null || editMode) return;
-    touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
-  };
-
-  const handleTouchEnd = () => {
-    if (editMode) return;
-    setSwiping(false);
-    if (Math.abs(touchDeltaX.current) > 40) {
-      if (touchDeltaX.current < 0 && currentIndex < total - 1) {
-        goTo(currentIndex + 1);
-      } else if (touchDeltaX.current > 0 && currentIndex > 0) {
-        goTo(currentIndex - 1);
-      }
+  const onStart = (x: number) => { if (!editMode) { touchX.current = x; delta.current = 0; } };
+  const onMove = (x: number) => { if (touchX.current !== null) delta.current = x - touchX.current; };
+  const onEnd = () => {
+    if (editMode || touchX.current === null) return;
+    if (Math.abs(delta.current) > 40) {
+      if (delta.current < 0 && idx < total - 1) go(idx + 1);
+      else if (delta.current > 0 && idx > 0) go(idx - 1);
     }
-    touchStartX.current = null;
-    touchDeltaX.current = 0;
+    touchX.current = null;
+    delta.current = 0;
   };
 
-  const mouseStartX = useRef<number | null>(null);
-  const mouseDeltaX = useRef(0);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (editMode || total <= 1) return;
-    mouseStartX.current = e.clientX;
-    mouseDeltaX.current = 0;
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (mouseStartX.current === null || editMode) return;
-    mouseDeltaX.current = e.clientX - mouseStartX.current;
-  };
-
-  const handleMouseUp = () => {
-    if (editMode || mouseStartX.current === null) return;
-    if (Math.abs(mouseDeltaX.current) > 40) {
-      if (mouseDeltaX.current < 0 && currentIndex < total - 1) {
-        goTo(currentIndex + 1);
-      } else if (mouseDeltaX.current > 0 && currentIndex > 0) {
-        goTo(currentIndex - 1);
-      }
-    }
-    mouseStartX.current = null;
-    mouseDeltaX.current = 0;
-  };
-
-  if (total <= 1) {
-    return <WidgetRenderer type={mainType} />;
-  }
+  if (total <= 1) return <WidgetRenderer type={mainType} />;
 
   return (
     <div
       className="relative w-full h-full overflow-hidden"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
+      onTouchStart={(e) => onStart(e.touches[0].clientX)}
+      onTouchMove={(e) => onMove(e.touches[0].clientX)}
+      onTouchEnd={onEnd}
+      onMouseDown={(e) => { if (!editMode && total > 1) onStart(e.clientX); }}
+      onMouseMove={(e) => onMove(e.clientX)}
+      onMouseUp={onEnd}
     >
-      <div className="flex h-full transition-transform duration-300" style={{ transform: `translateX(-${currentIndex * 100}%)`, width: `${total * 100}%` }}>
-        {allTypes.map((type, i) => (
-          <div key={i} className="w-full h-full flex-shrink-0" style={{ width: `${100 / total}%` }}>
+      <div
+        className="flex h-full"
+        style={{
+          transform: `translateX(-${idx * 100}%)`,
+          width: `${total * 100}%`,
+          transition: 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+        }}
+      >
+        {all.map((type, i) => (
+          <div key={i} className="h-full flex-shrink-0" style={{ width: `${100 / total}%` }}>
             <WidgetRenderer type={type} />
           </div>
         ))}
       </div>
 
-      {!editMode && currentIndex > 0 && (
-        <button className="absolute left-1 top-1/2 -translate-y-1/2 btn-pill p-1 opacity-60 hover:opacity-100" onClick={(e) => { e.stopPropagation(); goTo(currentIndex - 1); }}>
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-      )}
-      {!editMode && currentIndex < total - 1 && (
-        <button className="absolute right-1 top-1/2 -translate-y-1/2 btn-pill p-1 opacity-60 hover:opacity-100" onClick={(e) => { e.stopPropagation(); goTo(currentIndex + 1); }}>
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      )}
-
+      {/* Dots */}
       <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
-        {allTypes.map((_, i) => (
-          <button key={i} className="w-1.5 h-1.5 rounded-full transition-all" style={{ background: i === currentIndex ? 'hsl(var(--accent))' : 'hsl(var(--foreground) / 0.2)' }} onClick={(e) => { e.stopPropagation(); goTo(i); }} />
+        {all.map((_, i) => (
+          <button
+            key={i}
+            className="rounded-full transition-all duration-300"
+            style={{
+              width: i === idx ? '16px' : '5px',
+              height: '5px',
+              background: i === idx ? 'hsl(var(--accent))' : 'hsl(var(--foreground) / 0.15)',
+            }}
+            onClick={(e) => { e.stopPropagation(); go(i); }}
+          />
         ))}
       </div>
     </div>

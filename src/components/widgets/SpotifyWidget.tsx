@@ -1,4 +1,4 @@
-import { Play, Pause, SkipBack, SkipForward } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Music } from 'lucide-react';
 import { useSpotify } from '@/hooks/useSpotify';
 
 export default function SpotifyWidget() {
@@ -7,13 +7,13 @@ export default function SpotifyWidget() {
   if (!connected) {
     return (
       <div className="flex flex-col items-center justify-center h-full w-full gap-3 p-4">
-        <span className="t-label">Spotify</span>
+        <Music className="w-6 h-6 text-muted-foreground" />
         <span className="text-sm text-muted-foreground text-center">
-          {loading ? 'Connecting...' : 'Connect your Spotify to control playback'}
+          {loading ? 'Connecting...' : 'Connect Spotify'}
         </span>
         {!loading && (
-          <button onClick={(e) => { e.stopPropagation(); connect(); }} className="btn-pill text-sm">
-            Connect Spotify
+          <button onClick={(e) => { e.stopPropagation(); connect(); }} className="btn-native accent text-sm">
+            Connect
           </button>
         )}
       </div>
@@ -22,15 +22,14 @@ export default function SpotifyWidget() {
 
   return (
     <div className="flex flex-col items-center justify-center h-full w-full gap-3 p-4">
-      <span className="t-label">Now Playing</span>
       {track ? (
         <>
           <div className="flex items-center gap-3 w-full">
             {track.albumArt ? (
-              <img src={track.albumArt} alt={track.album} className="w-12 h-12 rounded-lg object-cover" />
+              <img src={track.albumArt} alt={track.album} className="w-11 h-11 rounded-lg object-cover" />
             ) : (
-              <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ background: 'hsl(var(--surface-bright))' }}>
-                🎵
+              <div className="w-11 h-11 rounded-lg flex items-center justify-center" style={{ background: 'hsl(var(--surface-bright))' }}>
+                <Music className="w-5 h-5 text-muted-foreground" />
               </div>
             )}
             <div className="flex-1 min-w-0">
@@ -38,21 +37,20 @@ export default function SpotifyWidget() {
               <div className="text-xs text-muted-foreground truncate">{track.artist}</div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <button onClick={(e) => { e.stopPropagation(); prev(); }} className="btn-pill p-2"><SkipBack className="w-4 h-4" /></button>
+          <div className="flex items-center gap-2">
+            <button onClick={(e) => { e.stopPropagation(); prev(); }} className="btn-icon w-8 h-8"><SkipBack className="w-4 h-4" /></button>
             <button
               onClick={(e) => { e.stopPropagation(); track.isPlaying ? pause() : play(); }}
-              className="btn-pill p-2.5"
-              style={{ background: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}
+              className="btn-icon accent w-10 h-10"
             >
-              {track.isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+              {track.isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
             </button>
-            <button onClick={(e) => { e.stopPropagation(); next(); }} className="btn-pill p-2"><SkipForward className="w-4 h-4" /></button>
+            <button onClick={(e) => { e.stopPropagation(); next(); }} className="btn-icon w-8 h-8"><SkipForward className="w-4 h-4" /></button>
           </div>
         </>
       ) : (
         <span className="text-sm text-muted-foreground text-center">
-          No track playing — start playback on any Spotify device
+          Start playing on any device
         </span>
       )}
     </div>

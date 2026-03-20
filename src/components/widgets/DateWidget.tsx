@@ -8,12 +8,15 @@ export default function DateWidget() {
     return () => clearInterval(id);
   }, []);
 
-  const formatted = date.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
+  const weekday = date.toLocaleDateString([], { weekday: 'long' });
+  const monthDay = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  const year = date.getFullYear();
 
   return (
-    <div className="flex flex-col items-center justify-center h-full w-full gap-2 p-4">
-      <span className="t-label">Today</span>
-      <span className="t-display text-2xl">{formatted}</span>
+    <div className="flex flex-col items-center justify-center h-full w-full gap-1 p-4">
+      <span className="t-label">{weekday}</span>
+      <span className="t-display text-2xl">{monthDay}</span>
+      <span className="text-xs text-muted-foreground mt-1">{year}</span>
     </div>
   );
 }

@@ -3,6 +3,11 @@ import { WidgetType, WidgetConfig, WIDGET_LABELS, generateWidgetId } from '@/typ
 
 const ALL_TYPES: WidgetType[] = ['clock', 'date', 'timer', 'stopwatch', 'spotify', 'lyrics', 'gif', 'weather', 'pomodoro', 'notes'];
 
+const ICONS: Record<WidgetType, string> = {
+  clock: '⏰', date: '📅', timer: '⏱️', stopwatch: '🏃', spotify: '🎵',
+  lyrics: '📝', gif: '🖼️', weather: '🌤️', pomodoro: '🍅', notes: '📋',
+};
+
 interface Props {
   onAdd: (widget: WidgetConfig) => void;
   onClose: () => void;
@@ -22,16 +27,44 @@ export default function WidgetPicker({ onAdd, onClose }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'hsl(0 0% 0% / 0.6)' }}>
-      <div className="absolute inset-0" onClick={(e) => { e.stopPropagation(); onClose(); }}>
-        <X className="absolute top-4 right-4 w-6 h-6 cursor-pointer text-foreground/60 hover:text-foreground" />
-      </div>
-      <div className="relative rounded-2xl p-6" style={{ background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))' }} onClick={(e) => e.stopPropagation()}>
-        <h3 className="text-sm font-semibold text-foreground mb-4">Add Widget</h3>
-        <div className="grid grid-cols-3 gap-2">
-          {ALL_TYPES.map(type => (
-            <button key={type} onClick={() => handleAdd(type)} className="btn-pill text-xs py-3 px-2 text-center">
-              {WIDGET_LABELS[type]}
+    <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={(e) => { e.stopPropagation(); onClose(); }}>
+      {/* Backdrop */}
+      <div className="absolute inset-0" style={{ background: 'hsl(var(--background) / 0.7)', backdropFilter: 'blur(8px)' }} />
+
+      {/* Panel */}
+      <div
+        className="relative animate-scale-in"
+        style={{
+          background: 'hsl(var(--surface))',
+          border: '1px solid hsl(var(--border))',
+          borderRadius: '20px',
+          padding: '24px',
+          minWidth: '320px',
+          maxWidth: '400px',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="text-sm font-semibold text-foreground">Add Widget</h3>
+          <button className="btn-icon w-7 h-7" style={{ background: 'hsl(var(--surface-bright))' }} onClick={onClose}>
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          {ALL_TYPES.map((type, i) => (
+            <button
+              key={type}
+              onClick={() => handleAdd(type)}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-all duration-200 hover:scale-[1.02] active:scale-[0.97]"
+              style={{
+                background: 'hsl(var(--surface-bright))',
+                border: '1px solid hsl(var(--border))',
+                animationDelay: `${i * 30}ms`,
+              }}
+            >
+              <span className="text-lg">{ICONS[type]}</span>
+              <span className="text-sm font-medium text-foreground">{WIDGET_LABELS[type]}</span>
             </button>
           ))}
         </div>

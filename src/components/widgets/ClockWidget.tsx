@@ -18,9 +18,9 @@ function loadClockSettings(): ClockSettings {
 export default function ClockWidget() {
   const [settings, setSettings] = useState<ClockSettings>(loadClockSettings);
   const [showSettings, setShowSettings] = useState(false);
-  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPress = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const updateSettings = useCallback((partial: Partial<ClockSettings>) => {
+  const update = useCallback((partial: Partial<ClockSettings>) => {
     setSettings(prev => {
       const next = { ...prev, ...partial };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
@@ -48,27 +48,22 @@ export default function ClockWidget() {
   }
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden">
+    <div className="relative w-full h-full flex items-center justify-center">
       <div
         className="w-full h-full flex items-center justify-center cursor-pointer"
         onClick={(e) => { e.stopPropagation(); cycleStyle(); }}
         onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setShowSettings(true); }}
-        onTouchStart={() => {
-          longPressTimer.current = setTimeout(() => setShowSettings(true), 600);
-        }}
-        onTouchEnd={() => { if (longPressTimer.current) clearTimeout(longPressTimer.current); }}
-        onTouchMove={() => { if (longPressTimer.current) clearTimeout(longPressTimer.current); }}
+        onTouchStart={() => { longPress.current = setTimeout(() => setShowSettings(true), 600); }}
+        onTouchEnd={() => { if (longPress.current) clearTimeout(longPress.current); }}
+        onTouchMove={() => { if (longPress.current) clearTimeout(longPress.current); }}
       >
         {settings.bgType !== 'none' && (
-          <div className="absolute inset-0 rounded-[inherit]" style={{ ...bgStyle, opacity: settings.bgOpacity }} />
+          <div className="absolute inset-0" style={{ ...bgStyle, opacity: settings.bgOpacity, borderRadius: 'inherit' }} />
         )}
         <ClockFaceRenderer settings={settings} />
-        <div className="absolute bottom-2 right-3 text-[0.6rem] text-muted-foreground opacity-40">
-          {CLOCK_STYLE_LABELS[settings.style]}
-        </div>
       </div>
       {showSettings && (
-        <ClockSettingsPanel settings={settings} onChange={updateSettings} onClose={() => setShowSettings(false)} />
+        <ClockSettingsPanel settings={settings} onChange={update} onClose={() => setShowSettings(false)} />
       )}
     </div>
   );

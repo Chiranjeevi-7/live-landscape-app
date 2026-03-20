@@ -1,105 +1,96 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, X, Check } from 'lucide-react';
 
-interface TodoItem {
-  id: string;
-  text: string;
-  done: boolean;
-}
+interface TodoItem { id: string; text: string; done: boolean; }
 
 const STORAGE_KEY = 'monolith_notes';
 
-function loadTodos(): TodoItem[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch { /* ignore */ }
+function load(): TodoItem[] {
+  try { const r = localStorage.getItem(STORAGE_KEY); if (r) return JSON.parse(r); } catch {}
   return [];
 }
 
 export default function NotesWidget() {
-  const [todos, setTodos] = useState<TodoItem[]>(loadTodos);
+  const [todos, setTodos] = useState<TodoItem[]>(load);
   const [input, setInput] = useState('');
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
-  }, [todos]);
+  useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(todos)); }, [todos]);
 
-  const addTodo = useCallback(() => {
-    const text = input.trim();
-    if (!text) return;
-    setTodos(prev => [...prev, { id: `${Date.now()}`, text, done: false }]);
+  const add = useCallback(() => {
+    const t = input.trim();
+    if (!t) return;
+    setTodos(p => [...p, { id: `${Date.now()}`, text: t, done: false }]);
     setInput('');
   }, [input]);
 
-  const toggleTodo = useCallback((id: string) => {
-    setTodos(prev => prev.map(t => t.id === id ? { ...t, done: !t.done } : t));
+  const toggle = useCallback((id: string) => {
+    setTodos(p => p.map(t => t.id === id ? { ...t, done: !t.done } : t));
   }, []);
 
-  const removeTodo = useCallback((id: string) => {
-    setTodos(prev => prev.filter(t => t.id !== id));
+  const remove = useCallback((id: string) => {
+    setTodos(p => p.filter(t => t.id !== id));
   }, []);
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') addTodo();
-  };
 
   const pending = todos.filter(t => !t.done);
-  const completed = todos.filter(t => t.done);
+  const done = todos.filter(t => t.done);
 
   return (
     <div className="flex flex-col h-full w-full p-3 gap-2 overflow-hidden">
-      <span className="t-label">Notes / Todo</span>
       <div className="flex gap-2 items-center">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
+          onKeyDown={(e) => e.key === 'Enter' && add()}
           placeholder="Add a task..."
-          className="flex-1 rounded-full px-4 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
-          style={{ background: 'hsl(var(--surface-bright))' }}
+          className="input-native flex-1 py-2 text-sm"
+          style={{ borderRadius: '100px', paddingLeft: '14px', paddingRight: '14px' }}
           onClick={(e) => e.stopPropagation()}
         />
-        <button onClick={(e) => { e.stopPropagation(); addTodo(); }} className="btn-pill p-2">
+        <button onClick={(e) => { e.stopPropagation(); add(); }} className="btn-icon accent w-8 h-8">
           <Plus className="w-4 h-4" />
         </button>
       </div>
-      {pending.length === 0 && completed.length === 0 && (
+
+      {pending.length === 0 && done.length === 0 && (
         <div className="flex-1 flex items-center justify-center">
-          <span className="text-sm text-muted-foreground">No tasks yet — add one above</span>
+          <span className="text-sm text-muted-foreground">No tasks yet</span>
         </div>
       )}
-      <div className="flex-1 overflow-y-auto space-y-1 min-h-0">
+
+      <div className="flex-1 overflow-y-auto space-y-0.5 min-h-0">
         {pending.map(todo => (
-          <div key={todo.id} className="group flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-accent/5 transition-colors">
+          <div key={todo.id} className="group flex items-center gap-2 px-2 py-2 rounded-xl transition-colors" style={{ background: 'transparent' }}>
             <button
-              onClick={(e) => { e.stopPropagation(); toggleTodo(todo.id); }}
-              className="w-5 h-5 rounded-full border border-accent/40 flex items-center justify-center shrink-0 transition-colors hover:border-accent"
+              onClick={(e) => { e.stopPropagation(); toggle(todo.id); }}
+              className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-90"
+              style={{ border: '2px solid hsl(var(--muted-foreground) / 0.3)' }}
             />
             <span className="flex-1 text-sm text-foreground truncate">{todo.text}</span>
-            <button onClick={(e) => { e.stopPropagation(); removeTodo(todo.id); }} className="opacity-0 group-hover:opacity-60 transition-opacity" aria-label="Remove">
+            <button onClick={(e) => { e.stopPropagation(); remove(todo.id); }} className="opacity-0 group-hover:opacity-60 transition-opacity active:scale-90">
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
         ))}
-        {completed.map(todo => (
-          <div key={todo.id} className="group flex items-center gap-2 px-2 py-1.5 rounded-lg opacity-50">
+        {done.map(todo => (
+          <div key={todo.id} className="group flex items-center gap-2 px-2 py-2 rounded-xl opacity-40">
             <button
-              onClick={(e) => { e.stopPropagation(); toggleTodo(todo.id); }}
-              className="w-5 h-5 rounded-full border border-accent/40 flex items-center justify-center shrink-0 bg-accent/20"
+              onClick={(e) => { e.stopPropagation(); toggle(todo.id); }}
+              className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 active:scale-90"
+              style={{ background: 'hsl(var(--accent) / 0.2)', border: '2px solid hsl(var(--accent) / 0.3)' }}
             >
-              <Check className="w-3 h-3" />
+              <Check className="w-3 h-3 text-accent" />
             </button>
             <span className="flex-1 text-sm text-foreground truncate line-through">{todo.text}</span>
-            <button onClick={(e) => { e.stopPropagation(); removeTodo(todo.id); }} className="opacity-0 group-hover:opacity-60 transition-opacity" aria-label="Remove">
+            <button onClick={(e) => { e.stopPropagation(); remove(todo.id); }} className="opacity-0 group-hover:opacity-60 transition-opacity">
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
         ))}
       </div>
+
       {todos.length > 0 && (
         <div className="text-center">
-          <span className="text-xs text-muted-foreground">{pending.length} pending · {completed.length} done</span>
+          <span className="text-[0.65rem] text-muted-foreground">{pending.length} pending · {done.length} done</span>
         </div>
       )}
     </div>

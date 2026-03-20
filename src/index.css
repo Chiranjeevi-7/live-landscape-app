@@ -4,142 +4,174 @@
 
 @layer base {
   :root {
-    --bg: 0 0% 2%;
-    --background: 0 0% 2%;
-    --foreground: 0 0% 100%;
-    --surface: 0 0% 100% / 0.05;
-    --surface-bright: 0 0% 100% / 0.1;
-    --surface-hover: 0 0% 100% / 0.08;
-    --card: 0 0% 100% / 0.05;
-    --card-foreground: 0 0% 100%;
-    --popover: 0 0% 8%;
-    --popover-foreground: 0 0% 100%;
+    --bg: 228 12% 4%;
+    --background: 228 12% 4%;
+    --foreground: 220 20% 97%;
+    --surface: 220 15% 12%;
+    --surface-bright: 220 14% 16%;
+    --surface-hover: 220 14% 20%;
+    --card: 220 15% 10%;
+    --card-foreground: 220 20% 97%;
+    --popover: 220 15% 8%;
+    --popover-foreground: 220 20% 97%;
     --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 100% / 0.05;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 0 0% 100% / 0.05;
-    --muted-foreground: 0 0% 100% / 0.5;
+    --secondary: 220 14% 14%;
+    --secondary-foreground: 220 20% 97%;
+    --muted: 220 14% 14%;
+    --muted-foreground: 220 10% 55%;
     --accent: 217 91% 60%;
     --accent-foreground: 0 0% 100%;
-    --accent-glow: 217 91% 60% / 0.15;
-    --accent-subtle: 217 91% 60% / 0.08;
+    --accent-glow: 217 91% 60% / 0.12;
+    --accent-subtle: 217 91% 60% / 0.06;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 100% / 0.05;
-    --input: 0 0% 100% / 0.1;
+    --border: 220 14% 14%;
+    --input: 220 14% 16%;
     --ring: 217 91% 60%;
-    --radius: 24px;
-    --sidebar-background: 0 0% 4%;
-    --sidebar-foreground: 0 0% 100%;
+    --radius: 20px;
+    --sidebar-background: 220 15% 6%;
+    --sidebar-foreground: 220 20% 97%;
     --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 100% / 0.05;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 100% / 0.05;
+    --sidebar-accent: 220 14% 14%;
+    --sidebar-accent-foreground: 220 20% 97%;
+    --sidebar-border: 220 14% 14%;
     --sidebar-ring: 217 91% 60%;
-    --easing: cubic-bezier(0.2, 0, 0, 1);
-    --gap: 16px;
-    --radius-lg: 24px;
-    --radius-md: 16px;
-    --widget-shadow: 0 4px 24px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05);
-    --widget-glow: 0 0 40px hsl(var(--accent-glow));
+    --easing: cubic-bezier(0.22, 1, 0.36, 1);
+    --easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --gap: 12px;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
   }
 
   .theme-lofi {
-    --bg: 30 15% 4%;
-    --background: 30 15% 4%;
-    --primary: 30 60% 55%;
-    --accent: 30 60% 55%;
-    --ring: 30 60% 55%;
-    --accent-glow: 30 60% 55% / 0.15;
-    --accent-subtle: 30 60% 55% / 0.08;
-    --surface: 30 10% 100% / 0.04;
-    --surface-bright: 30 10% 100% / 0.08;
+    --bg: 30 8% 5%;
+    --background: 30 8% 5%;
+    --surface: 28 8% 12%;
+    --surface-bright: 28 8% 16%;
+    --surface-hover: 28 8% 20%;
+    --card: 28 8% 10%;
+    --primary: 30 50% 50%;
+    --accent: 30 50% 50%;
+    --ring: 30 50% 50%;
+    --accent-glow: 30 50% 50% / 0.12;
+    --accent-subtle: 30 50% 50% / 0.06;
+    --muted-foreground: 30 8% 48%;
+    --border: 28 8% 14%;
   }
 
   .theme-cyberpunk {
-    --bg: 270 50% 3%;
-    --background: 270 50% 3%;
-    --primary: 320 100% 60%;
-    --accent: 320 100% 60%;
-    --ring: 320 100% 60%;
-    --accent-glow: 320 100% 60% / 0.2;
-    --accent-subtle: 320 100% 60% / 0.1;
-    --surface: 280 30% 100% / 0.05;
-    --surface-bright: 280 30% 100% / 0.1;
+    --bg: 275 20% 4%;
+    --background: 275 20% 4%;
+    --surface: 275 18% 12%;
+    --surface-bright: 275 16% 16%;
+    --surface-hover: 275 16% 20%;
+    --card: 275 18% 10%;
+    --primary: 320 90% 58%;
+    --accent: 320 90% 58%;
+    --ring: 320 90% 58%;
+    --accent-glow: 320 90% 58% / 0.15;
+    --accent-subtle: 320 90% 58% / 0.08;
+    --muted-foreground: 275 10% 50%;
+    --border: 275 16% 14%;
   }
 
   .theme-minimal {
-    --bg: 0 0% 3%;
-    --background: 0 0% 3%;
-    --primary: 0 0% 70%;
-    --accent: 0 0% 70%;
-    --ring: 0 0% 70%;
-    --accent-glow: 0 0% 70% / 0.1;
-    --accent-subtle: 0 0% 70% / 0.05;
-    --surface: 0 0% 100% / 0.03;
-    --surface-bright: 0 0% 100% / 0.06;
+    --bg: 0 0% 4%;
+    --background: 0 0% 4%;
+    --surface: 0 0% 11%;
+    --surface-bright: 0 0% 15%;
+    --surface-hover: 0 0% 19%;
+    --card: 0 0% 9%;
+    --primary: 0 0% 65%;
+    --accent: 0 0% 65%;
+    --ring: 0 0% 65%;
+    --accent-glow: 0 0% 65% / 0.08;
+    --accent-subtle: 0 0% 65% / 0.04;
+    --muted-foreground: 0 0% 42%;
+    --border: 0 0% 13%;
   }
 
   .theme-vaporwave {
-    --bg: 280 60% 4%;
-    --background: 280 60% 4%;
-    --primary: 300 100% 70%;
-    --accent: 300 100% 70%;
-    --ring: 300 100% 70%;
-    --accent-glow: 300 100% 70% / 0.2;
-    --accent-subtle: 300 100% 70% / 0.1;
-    --surface: 280 40% 100% / 0.05;
-    --surface-bright: 280 40% 100% / 0.1;
+    --bg: 280 25% 4%;
+    --background: 280 25% 4%;
+    --surface: 280 20% 12%;
+    --surface-bright: 280 18% 16%;
+    --surface-hover: 280 18% 20%;
+    --card: 280 20% 10%;
+    --primary: 300 80% 68%;
+    --accent: 300 80% 68%;
+    --ring: 300 80% 68%;
+    --accent-glow: 300 80% 68% / 0.15;
+    --accent-subtle: 300 80% 68% / 0.08;
+    --muted-foreground: 280 12% 48%;
+    --border: 280 18% 14%;
   }
 
   .theme-forest {
-    --bg: 150 30% 3%;
-    --background: 150 30% 3%;
-    --primary: 150 60% 45%;
-    --accent: 150 60% 45%;
-    --ring: 150 60% 45%;
-    --accent-glow: 150 60% 45% / 0.15;
-    --accent-subtle: 150 60% 45% / 0.08;
-    --surface: 150 20% 100% / 0.04;
-    --surface-bright: 150 20% 100% / 0.08;
+    --bg: 150 15% 4%;
+    --background: 150 15% 4%;
+    --surface: 148 12% 12%;
+    --surface-bright: 148 10% 16%;
+    --surface-hover: 148 10% 20%;
+    --card: 148 12% 10%;
+    --primary: 152 50% 42%;
+    --accent: 152 50% 42%;
+    --ring: 152 50% 42%;
+    --accent-glow: 152 50% 42% / 0.12;
+    --accent-subtle: 152 50% 42% / 0.06;
+    --muted-foreground: 150 8% 45%;
+    --border: 148 10% 14%;
   }
 
   .theme-ocean {
-    --bg: 210 50% 3%;
-    --background: 210 50% 3%;
-    --primary: 195 90% 55%;
-    --accent: 195 90% 55%;
-    --ring: 195 90% 55%;
-    --accent-glow: 195 90% 55% / 0.18;
-    --accent-subtle: 195 90% 55% / 0.08;
-    --surface: 210 30% 100% / 0.04;
-    --surface-bright: 210 30% 100% / 0.09;
+    --bg: 212 25% 4%;
+    --background: 212 25% 4%;
+    --surface: 210 20% 12%;
+    --surface-bright: 210 18% 16%;
+    --surface-hover: 210 18% 20%;
+    --card: 210 20% 10%;
+    --primary: 195 75% 50%;
+    --accent: 195 75% 50%;
+    --ring: 195 75% 50%;
+    --accent-glow: 195 75% 50% / 0.14;
+    --accent-subtle: 195 75% 50% / 0.06;
+    --muted-foreground: 210 12% 48%;
+    --border: 210 18% 14%;
   }
 
   .theme-sunset {
-    --bg: 15 40% 3%;
-    --background: 15 40% 3%;
-    --primary: 25 95% 55%;
-    --accent: 25 95% 55%;
-    --ring: 25 95% 55%;
-    --accent-glow: 25 95% 55% / 0.18;
-    --accent-subtle: 25 95% 55% / 0.08;
-    --surface: 15 20% 100% / 0.04;
-    --surface-bright: 15 20% 100% / 0.09;
+    --bg: 15 18% 4%;
+    --background: 15 18% 4%;
+    --surface: 14 14% 12%;
+    --surface-bright: 14 12% 16%;
+    --surface-hover: 14 12% 20%;
+    --card: 14 14% 10%;
+    --primary: 25 85% 52%;
+    --accent: 25 85% 52%;
+    --ring: 25 85% 52%;
+    --accent-glow: 25 85% 52% / 0.14;
+    --accent-subtle: 25 85% 52% / 0.06;
+    --muted-foreground: 15 10% 48%;
+    --border: 14 12% 14%;
   }
 
   .theme-midnight {
-    --bg: 230 30% 2%;
-    --background: 230 30% 2%;
-    --primary: 230 60% 65%;
-    --accent: 230 60% 65%;
-    --ring: 230 60% 65%;
-    --accent-glow: 230 60% 65% / 0.15;
-    --accent-subtle: 230 60% 65% / 0.06;
-    --surface: 230 20% 100% / 0.03;
-    --surface-bright: 230 20% 100% / 0.07;
+    --bg: 230 18% 3%;
+    --background: 230 18% 3%;
+    --surface: 228 16% 12%;
+    --surface-bright: 228 14% 16%;
+    --surface-hover: 228 14% 20%;
+    --card: 228 16% 10%;
+    --primary: 230 55% 62%;
+    --accent: 230 55% 62%;
+    --ring: 230 55% 62%;
+    --accent-glow: 230 55% 62% / 0.12;
+    --accent-subtle: 230 55% 62% / 0.05;
+    --muted-foreground: 230 12% 44%;
+    --border: 228 14% 13%;
   }
 }
 
@@ -150,95 +182,168 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
   body {
     @apply bg-background text-foreground;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     overflow: hidden;
+    touch-action: manipulation;
+    user-select: none;
+    overscroll-behavior: none;
+  }
+
+  input, textarea {
+    user-select: text;
+    -webkit-user-select: text;
   }
 }
 
 @layer components {
-  .widget-panel {
+  /* ─── Native-feel widget surface ─── */
+  .widget-surface {
     background: hsl(var(--surface));
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     border-radius: var(--radius-lg);
-    box-shadow: var(--widget-shadow);
-    border: 1px solid hsl(var(--accent-subtle));
-    transition: transform 0.2s var(--easing), background 0.2s var(--easing), box-shadow 0.3s var(--easing);
+    border: 1px solid hsl(var(--border));
     position: relative;
     overflow: hidden;
+    will-change: transform;
+    transition: transform 0.4s var(--easing), box-shadow 0.4s var(--easing);
   }
 
-  .widget-panel::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, hsl(var(--accent) / 0.3), transparent);
+  .widget-surface:active {
+    transform: scale(0.97);
+    transition-duration: 0.12s;
   }
 
-  .widget-panel:hover {
-    box-shadow: var(--widget-shadow), var(--widget-glow);
+  .widget-surface.editing {
+    box-shadow: 0 0 0 2px hsl(var(--accent) / 0.3);
   }
 
-  .widget-panel:active {
-    transform: scale(0.98);
+  .widget-surface.editing:active {
+    transform: none;
   }
 
+  /* ─── Typography ─── */
   .t-display {
-    font-size: clamp(2rem, 8vw, 3.5rem);
-    font-weight: 700;
-    letter-spacing: -0.04em;
+    font-size: clamp(1.75rem, 6vw, 3rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
     font-variant-numeric: tabular-nums;
-    line-height: 1;
-    background: linear-gradient(180deg, hsl(var(--foreground)), hsl(var(--foreground) / 0.7));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    line-height: 1.05;
+    color: hsl(var(--foreground));
   }
 
   .t-label {
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: hsl(var(--accent) / 0.7);
-    margin-bottom: 8px;
+    letter-spacing: 0.08em;
+    color: hsl(var(--muted-foreground));
   }
 
   .t-body {
-    font-size: 1rem;
+    font-size: 0.9375rem;
+    line-height: 1.5;
     color: hsl(var(--foreground));
   }
 
-  .overlay-pill {
-    background: hsla(0, 0%, 0%, 0.8);
-    border-radius: 100px;
-    padding: 8px;
-    border: 1px solid hsl(var(--accent-subtle));
-    box-shadow: 0 0 20px hsl(var(--accent-glow));
-  }
-
-  .btn-pill {
-    background: hsl(var(--surface-bright));
-    border: 1px solid hsl(var(--accent-subtle));
+  /* ─── Native-feel pill button ─── */
+  .btn-native {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    font-size: 0.8125rem;
+    font-weight: 500;
     color: hsl(var(--foreground));
-    padding: 10px 18px;
+    background: hsl(var(--surface));
+    border: 1px solid hsl(var(--border));
     border-radius: 100px;
-    font-size: 0.8rem;
     cursor: pointer;
-    transition: background 0.2s var(--easing), border-color 0.2s var(--easing), box-shadow 0.2s var(--easing);
+    transition: background 0.2s var(--easing), transform 0.15s var(--easing);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 
-  .btn-pill:hover {
-    background: hsl(var(--surface-hover, var(--surface-bright)));
-    border-color: hsl(var(--accent) / 0.3);
-    box-shadow: 0 0 12px hsl(var(--accent-glow));
+  .btn-native:hover {
+    background: hsl(var(--surface-bright));
   }
 
+  .btn-native:active {
+    transform: scale(0.95);
+    transition-duration: 0.08s;
+  }
+
+  .btn-native.accent {
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-foreground));
+    border-color: transparent;
+  }
+
+  .btn-native.accent:hover {
+    filter: brightness(1.1);
+  }
+
+  .btn-native.ghost {
+    background: transparent;
+    border-color: transparent;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .btn-native.ghost:hover {
+    background: hsl(var(--surface));
+    color: hsl(var(--foreground));
+  }
+
+  /* ─── Icon button ─── */
+  .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: hsl(var(--surface));
+    color: hsl(var(--foreground) / 0.8);
+    cursor: pointer;
+    transition: background 0.2s var(--easing), transform 0.15s var(--easing);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn-icon:active {
+    transform: scale(0.9);
+    transition-duration: 0.08s;
+  }
+
+  .btn-icon.accent {
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-foreground));
+  }
+
+  /* ─── Control dock ─── */
+  .control-dock {
+    background: hsl(var(--surface));
+    border: 1px solid hsl(var(--border));
+    border-radius: 100px;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* ─── Progress bar ─── */
   .progress-track {
-    height: 4px;
+    height: 3px;
     background: hsl(var(--surface-bright));
     border-radius: 2px;
     overflow: hidden;
@@ -246,25 +351,41 @@
 
   .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, hsl(var(--accent)), hsl(var(--accent) / 0.6));
+    background: hsl(var(--accent));
     border-radius: 2px;
     transition: width 0.3s var(--easing);
-    box-shadow: 0 0 8px hsl(var(--accent-glow));
   }
 
+  /* ─── Native input ─── */
+  .input-native {
+    background: hsl(var(--surface-bright));
+    border: 1px solid hsl(var(--border));
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 0.875rem;
+    color: hsl(var(--foreground));
+    outline: none;
+    transition: border-color 0.2s var(--easing), box-shadow 0.2s var(--easing);
+    width: 100%;
+  }
+
+  .input-native::placeholder {
+    color: hsl(var(--muted-foreground));
+  }
+
+  .input-native:focus {
+    border-color: hsl(var(--accent) / 0.5);
+    box-shadow: 0 0 0 3px hsl(var(--accent) / 0.1);
+  }
+
+  /* ─── Auto dim ─── */
   .auto-dimmed {
     filter: brightness(0.4);
-    transition: filter 1s var(--easing);
+    transition: filter 1.5s var(--easing);
   }
 }
 
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* Portrait orientation warning overlay */
+/* ─── Portrait orientation warning ─── */
 @media (orientation: portrait) {
   .portrait-warning {
     display: flex !important;
@@ -282,18 +403,51 @@
   justify-content: center;
   flex-direction: column;
   gap: 1rem;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
+  font-weight: 500;
   text-align: center;
   padding: 2rem;
 }
 
 .portrait-warning svg {
-  width: 3rem;
-  height: 3rem;
-  animation: rotate90 1.5s ease-in-out infinite alternate;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: hsl(var(--muted-foreground));
+  animation: rotate90 2s var(--easing) infinite alternate;
 }
 
 @keyframes rotate90 {
   from { transform: rotate(0deg); }
   to { transform: rotate(90deg); }
+}
+
+/* ─── Smooth appear animation ─── */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.5s var(--easing) both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.4s var(--easing) both;
 }

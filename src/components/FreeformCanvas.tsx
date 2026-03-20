@@ -2,32 +2,32 @@ import { useRef, useCallback, useState } from 'react';
 import type { WidgetConfig, WidgetShape, WidgetType } from '@/types/dashboard';
 import { SHAPE_LABELS, WIDGET_LABELS, generateWidgetId } from '@/types/dashboard';
 import WidgetCarousel from '@/components/widgets/WidgetCarousel';
-import { X, Move, Maximize2, Plus } from 'lucide-react';
+import { X, GripVertical, Maximize2, Plus } from 'lucide-react';
 
-const SNAP_THRESHOLD = 2;
-const MIN_SIZE = 15;
+const SNAP = 2;
+const MIN_SIZE = 14;
 
-function getShapeStyle(shape: WidgetShape): React.CSSProperties {
+function shapeRadius(shape: WidgetShape): string {
   switch (shape) {
-    case 'rectangle': return { borderRadius: '4px' };
-    case 'rounded': return { borderRadius: '16px' };
-    case 'squircle': return { borderRadius: '24px' };
-    case 'circle': return { borderRadius: '50%' };
-    case 'edge-to-edge': return { borderRadius: '0', padding: '0' };
-    default: return { borderRadius: '24px' };
+    case 'rectangle': return '6px';
+    case 'rounded': return '14px';
+    case 'squircle': return '20px';
+    case 'circle': return '50%';
+    case 'edge-to-edge': return '0';
+    default: return '20px';
   }
 }
 
-function snapValue(v: number): number {
-  if (v < SNAP_THRESHOLD) return 0;
-  if (v > 100 - SNAP_THRESHOLD) return 100;
-  if (Math.abs(v - 50) < SNAP_THRESHOLD) return 50;
+function snap(v: number): number {
+  if (v < SNAP) return 0;
+  if (v > 100 - SNAP) return 100;
+  if (Math.abs(v - 50) < SNAP) return 50;
   return v;
 }
 
-type ResizeDir = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
+type Dir = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
 
-const ADDABLE_TYPES: WidgetType[] = ['clock', 'date', 'timer', 'stopwatch', 'spotify', 'lyrics', 'gif', 'weather', 'pomodoro', 'notes'];
+const TYPES: WidgetType[] = ['clock', 'date', 'timer', 'stopwatch', 'spotify', 'lyrics', 'gif', 'weather', 'pomodoro', 'notes'];
 
 interface Props {
   widgets: WidgetConfig[];
@@ -41,185 +41,164 @@ export default function FreeformCanvas({ widgets, editMode, onUpdate, onRemove }
   const [activeId, setActiveId] = useState<string | null>(null);
   const [addingToId, setAddingToId] = useState<string | null>(null);
 
-  const getCanvasRect = useCallback(() => {
-    return canvasRef.current?.getBoundingClientRect() ?? { left: 0, top: 0, width: 1, height: 1 };
-  }, []);
+  const rect = useCallback(() =>
+    canvasRef.current?.getBoundingClientRect() ?? { left: 0, top: 0, width: 1, height: 1 },
+  []);
 
-  const toPercent = useCallback((px: number, total: number) => (px / total) * 100, []);
+  const pct = useCallback((px: number, total: number) => (px / total) * 100, []);
 
-  const handleDragStart = useCallback((e: React.PointerEvent, widget: WidgetConfig) => {
+  const handleDrag = useCallback((e: React.PointerEvent, w: WidgetConfig) => {
     if (!editMode) return;
     e.preventDefault();
     e.stopPropagation();
-    setActiveId(widget.id);
+    setActiveId(w.id);
+    const r = rect();
+    const sx = e.clientX, sy = e.clientY;
+    const ox = w.x, oy = w.y;
 
-    const rect = getCanvasRect();
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const origX = widget.x;
-    const origY = widget.y;
-
-    const onMove = (ev: PointerEvent) => {
-      const dx = toPercent(ev.clientX - startX, rect.width);
-      const dy = toPercent(ev.clientY - startY, rect.height);
-      let nx = Math.max(0, Math.min(100 - widget.w, origX + dx));
-      let ny = Math.max(0, Math.min(100 - widget.h, origY + dy));
-      nx = snapValue(nx);
-      ny = snapValue(ny);
-      if (nx + widget.w > 100 - SNAP_THRESHOLD && nx + widget.w < 100 + SNAP_THRESHOLD) {
-        nx = 100 - widget.w;
-      }
-      onUpdate(widget.id, { x: nx, y: ny });
+    const move = (ev: PointerEvent) => {
+      let nx = Math.max(0, Math.min(100 - w.w, ox + pct(ev.clientX - sx, r.width)));
+      let ny = Math.max(0, Math.min(100 - w.h, oy + pct(ev.clientY - sy, r.height)));
+      nx = snap(nx);
+      ny = snap(ny);
+      if (nx + w.w > 100 - SNAP) nx = 100 - w.w;
+      onUpdate(w.id, { x: nx, y: ny });
     };
 
-    const onUp = () => {
-      document.removeEventListener('pointermove', onMove);
-      document.removeEventListener('pointerup', onUp);
+    const up = () => {
+      document.removeEventListener('pointermove', move);
+      document.removeEventListener('pointerup', up);
       setActiveId(null);
     };
 
-    document.addEventListener('pointermove', onMove);
-    document.addEventListener('pointerup', onUp);
-  }, [editMode, getCanvasRect, toPercent, onUpdate]);
+    document.addEventListener('pointermove', move);
+    document.addEventListener('pointerup', up);
+  }, [editMode, rect, pct, onUpdate]);
 
-  const handleResize = useCallback((e: React.PointerEvent, widget: WidgetConfig, dir: ResizeDir) => {
+  const handleResize = useCallback((e: React.PointerEvent, w: WidgetConfig, dir: Dir) => {
     e.preventDefault();
     e.stopPropagation();
-    setActiveId(widget.id);
+    setActiveId(w.id);
+    const r = rect();
+    const sx = e.clientX, sy = e.clientY;
+    const orig = { x: w.x, y: w.y, w: w.w, h: w.h };
 
-    const rect = getCanvasRect();
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const orig = { x: widget.x, y: widget.y, w: widget.w, h: widget.h };
+    const move = (ev: PointerEvent) => {
+      const dx = pct(ev.clientX - sx, r.width);
+      const dy = pct(ev.clientY - sy, r.height);
+      let { x, y, w: nw, h: nh } = orig;
 
-    const onMove = (ev: PointerEvent) => {
-      const dx = toPercent(ev.clientX - startX, rect.width);
-      const dy = toPercent(ev.clientY - startY, rect.height);
-
-      let { x, y, w, h } = orig;
-
-      if (dir.includes('e')) w = Math.max(MIN_SIZE, orig.w + dx);
-      if (dir.includes('w')) { w = Math.max(MIN_SIZE, orig.w - dx); x = orig.x + orig.w - w; }
-      if (dir.includes('s')) h = Math.max(MIN_SIZE, orig.h + dy);
-      if (dir.includes('n')) { h = Math.max(MIN_SIZE, orig.h - dy); y = orig.y + orig.h - h; }
+      if (dir.includes('e')) nw = Math.max(MIN_SIZE, orig.w + dx);
+      if (dir.includes('w')) { nw = Math.max(MIN_SIZE, orig.w - dx); x = orig.x + orig.w - nw; }
+      if (dir.includes('s')) nh = Math.max(MIN_SIZE, orig.h + dy);
+      if (dir.includes('n')) { nh = Math.max(MIN_SIZE, orig.h - dy); y = orig.y + orig.h - nh; }
 
       x = Math.max(0, x);
       y = Math.max(0, y);
-      if (x + w > 100) w = 100 - x;
-      if (y + h > 100) h = 100 - y;
+      if (x + nw > 100) nw = 100 - x;
+      if (y + nh > 100) nh = 100 - y;
 
-      onUpdate(widget.id, { x, y, w, h });
+      onUpdate(w.id, { x, y, w: nw, h: nh });
     };
 
-    const onUp = () => {
-      document.removeEventListener('pointermove', onMove);
-      document.removeEventListener('pointerup', onUp);
+    const up = () => {
+      document.removeEventListener('pointermove', move);
+      document.removeEventListener('pointerup', up);
       setActiveId(null);
     };
 
-    document.addEventListener('pointermove', onMove);
-    document.addEventListener('pointerup', onUp);
-  }, [getCanvasRect, toPercent, onUpdate]);
+    document.addEventListener('pointermove', move);
+    document.addEventListener('pointerup', up);
+  }, [rect, pct, onUpdate]);
 
-  const cycleShape = useCallback((widget: WidgetConfig) => {
+  const cycleShape = useCallback((w: WidgetConfig) => {
     const shapes: WidgetShape[] = ['rectangle', 'rounded', 'squircle', 'circle', 'edge-to-edge'];
-    const idx = shapes.indexOf(widget.shape);
-    onUpdate(widget.id, { shape: shapes[(idx + 1) % shapes.length] });
+    onUpdate(w.id, { shape: shapes[(shapes.indexOf(w.shape) + 1) % shapes.length] });
   }, [onUpdate]);
 
-  const addSubWidget = useCallback((widgetId: string, type: WidgetType) => {
-    const widget = widgets.find(w => w.id === widgetId);
-    if (!widget) return;
-    const sub = { id: generateWidgetId(type), type };
-    const currentSubs = widget.subWidgets || [];
-    onUpdate(widgetId, {
-      subWidgets: [...currentSubs, sub],
-      activeSubIndex: currentSubs.length + 1,
+  const addSub = useCallback((wid: string, type: WidgetType) => {
+    const w = widgets.find(x => x.id === wid);
+    if (!w) return;
+    const subs = w.subWidgets || [];
+    onUpdate(wid, {
+      subWidgets: [...subs, { id: generateWidgetId(type), type }],
+      activeSubIndex: subs.length + 1,
     });
     setAddingToId(null);
   }, [widgets, onUpdate]);
 
-  const removeSubWidget = useCallback((widgetId: string, subIndex: number) => {
-    const widget = widgets.find(w => w.id === widgetId);
-    if (!widget || !widget.subWidgets) return;
-    const newSubs = widget.subWidgets.filter((_, i) => i !== subIndex);
-    const currentActive = widget.activeSubIndex || 0;
-    onUpdate(widgetId, {
-      subWidgets: newSubs,
-      activeSubIndex: Math.min(currentActive, newSubs.length),
-    });
-  }, [widgets, onUpdate]);
-
   return (
     <div ref={canvasRef} className="relative w-full h-full" style={{ touchAction: editMode ? 'none' : 'auto' }}>
-      {widgets.map(widget => {
-        const isActive = activeId === widget.id;
-        const shapeStyle = getShapeStyle(widget.shape);
-        const totalWidgets = 1 + (widget.subWidgets?.length || 0);
+      {widgets.map((w, i) => {
+        const active = activeId === w.id;
+        const totalSub = 1 + (w.subWidgets?.length || 0);
 
         return (
           <div
-            key={widget.id}
-            className={`widget-panel absolute overflow-hidden ${isActive ? 'z-50' : 'z-10'} ${editMode ? 'ring-1 ring-accent/30' : ''}`}
+            key={w.id}
+            className={`widget-surface absolute ${active ? 'z-50' : 'z-10'} ${editMode ? 'editing' : ''}`}
             style={{
-              left: `${widget.x}%`,
-              top: `${widget.y}%`,
-              width: `${widget.w}%`,
-              height: `${widget.h}%`,
-              ...shapeStyle,
+              left: `${w.x}%`,
+              top: `${w.y}%`,
+              width: `${w.w}%`,
+              height: `${w.h}%`,
+              borderRadius: shapeRadius(w.shape),
+              padding: w.shape === 'edge-to-edge' ? 0 : undefined,
+              animationDelay: `${i * 60}ms`,
             }}
           >
-            <div className="w-full h-full">
+            <div className="w-full h-full overflow-hidden" style={{ borderRadius: 'inherit' }}>
               <WidgetCarousel
-                mainType={widget.type}
-                subWidgets={widget.subWidgets}
-                activeIndex={widget.activeSubIndex || 0}
-                onIndexChange={(idx) => onUpdate(widget.id, { activeSubIndex: idx })}
+                mainType={w.type}
+                subWidgets={w.subWidgets}
+                activeIndex={w.activeSubIndex || 0}
+                onIndexChange={(idx) => onUpdate(w.id, { activeSubIndex: idx })}
                 editMode={editMode}
               />
             </div>
 
             {editMode && (
               <>
-                {/* Drag handle */}
-                <div className="absolute inset-0 z-20">
-                  <div
-                    className="absolute inset-4 cursor-move"
-                    onPointerDown={(e) => handleDragStart(e, widget)}
-                  />
+                {/* Drag area */}
+                <div
+                  className="absolute inset-4 z-20 cursor-grab active:cursor-grabbing"
+                  onPointerDown={(e) => handleDrag(e, w)}
+                />
+
+                {/* Center grip */}
+                <GripVertical className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 text-foreground/15 pointer-events-none z-30" />
+
+                {/* Top controls */}
+                <div className="absolute top-2 left-2 right-2 z-30 flex items-center gap-1">
+                  <button className="btn-icon w-7 h-7" style={{ background: 'hsl(var(--surface-bright))' }} onClick={(e) => { e.stopPropagation(); cycleShape(w); }}>
+                    <Maximize2 className="w-3 h-3" />
+                  </button>
+                  <button className="btn-icon w-7 h-7" style={{ background: 'hsl(var(--surface-bright))' }} onClick={(e) => { e.stopPropagation(); setAddingToId(addingToId === w.id ? null : w.id); }}>
+                    <Plus className="w-3 h-3" />
+                  </button>
+                  <div className="flex-1" />
+                  <button className="btn-icon w-7 h-7" style={{ background: 'hsl(var(--destructive) / 0.15)' }} onClick={(e) => { e.stopPropagation(); onRemove(w.id); }}>
+                    <X className="w-3 h-3 text-destructive" />
+                  </button>
                 </div>
 
-                {/* Move icon */}
-                <Move className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 text-foreground/20 pointer-events-none z-30" />
-
-                {/* Shape toggle */}
-                <button className="absolute top-2 left-2 z-30 btn-pill text-[0.6rem] py-1 px-2" onClick={(e) => { e.stopPropagation(); cycleShape(widget); }}>
-                  <Maximize2 className="w-3 h-3" />
-                </button>
-
-                {/* Add sub-widget */}
-                <button className="absolute top-2 right-8 z-30 btn-pill text-[0.6rem] py-1 px-2" onClick={(e) => { e.stopPropagation(); setAddingToId(addingToId === widget.id ? null : widget.id); }}>
-                  <Plus className="w-3 h-3" />
-                </button>
-
-                {/* Remove */}
-                <button className="absolute top-2 right-2 z-30 btn-pill text-[0.6rem] py-1 px-1.5" onClick={(e) => { e.stopPropagation(); onRemove(widget.id); }}>
-                  <X className="w-3 h-3" />
-                </button>
-
-                {/* Shape label */}
+                {/* Info badge */}
                 <div className="absolute bottom-2 left-2 z-30 pointer-events-none">
-                  <span className="text-[0.55rem] text-muted-foreground">
-                    {SHAPE_LABELS[widget.shape]}{totalWidgets > 1 ? ` · ${totalWidgets} widgets` : ''}
+                  <span className="text-[0.55rem] font-medium text-muted-foreground/60">
+                    {SHAPE_LABELS[w.shape]}{totalSub > 1 ? ` · ${totalSub}` : ''}
                   </span>
                 </div>
 
-                {/* Add sub-widget dropdown */}
-                {addingToId === widget.id && (
-                  <div className="absolute top-10 right-2 z-40 rounded-xl p-2" style={{ background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))' }}>
-                    <div className="grid grid-cols-2 gap-1" onClick={(e) => e.stopPropagation()}>
-                      {ADDABLE_TYPES.map(t => (
-                        <button key={t} className="btn-pill text-[0.6rem] py-1 px-2" onClick={() => addSubWidget(widget.id, t)}>
+                {/* Sub-widget picker dropdown */}
+                {addingToId === w.id && (
+                  <div
+                    className="absolute top-11 left-2 z-40 animate-scale-in"
+                    style={{ background: 'hsl(var(--surface))', border: '1px solid hsl(var(--border))', borderRadius: '14px', padding: '8px' }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="grid grid-cols-2 gap-1">
+                      {TYPES.map(t => (
+                        <button key={t} className="btn-native text-[0.65rem] py-1.5 px-2" onClick={() => addSub(w.id, t)}>
                           {WIDGET_LABELS[t]}
                         </button>
                       ))}
@@ -228,35 +207,31 @@ export default function FreeformCanvas({ widgets, editMode, onUpdate, onRemove }
                 )}
 
                 {/* Resize handles */}
-                {(['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'] as ResizeDir[]).map(dir => {
-                  const posStyle: React.CSSProperties = {};
-                  const cursorMap: Record<ResizeDir, string> = {
+                {(['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'] as Dir[]).map(dir => {
+                  const s: React.CSSProperties = {};
+                  const cur: Record<Dir, string> = {
                     n: 'ns-resize', s: 'ns-resize', e: 'ew-resize', w: 'ew-resize',
                     ne: 'nesw-resize', sw: 'nesw-resize', nw: 'nwse-resize', se: 'nwse-resize',
                   };
-
-                  if (dir.includes('n')) { posStyle.top = '-3px'; posStyle.height = '8px'; }
-                  if (dir.includes('s')) { posStyle.bottom = '-3px'; posStyle.height = '8px'; }
-                  if (dir.includes('e')) { posStyle.right = '-3px'; posStyle.width = '8px'; }
-                  if (dir.includes('w')) { posStyle.left = '-3px'; posStyle.width = '8px'; }
-
-                  if (dir === 'n' || dir === 's') { posStyle.left = '8px'; posStyle.right = '8px'; }
-                  if (dir === 'e' || dir === 'w') { posStyle.top = '8px'; posStyle.bottom = '8px'; }
-
-                  if (dir.length === 2) {
-                    posStyle.width = '12px';
-                    posStyle.height = '12px';
-                  }
+                  if (dir.includes('n')) { s.top = '-2px'; s.height = '8px'; }
+                  if (dir.includes('s')) { s.bottom = '-2px'; s.height = '8px'; }
+                  if (dir.includes('e')) { s.right = '-2px'; s.width = '8px'; }
+                  if (dir.includes('w')) { s.left = '-2px'; s.width = '8px'; }
+                  if (dir === 'n' || dir === 's') { s.left = '8px'; s.right = '8px'; }
+                  if (dir === 'e' || dir === 'w') { s.top = '8px'; s.bottom = '8px'; }
+                  if (dir.length === 2) { s.width = '14px'; s.height = '14px'; }
 
                   return (
                     <div
                       key={dir}
                       className="absolute z-30"
-                      style={{ ...posStyle, cursor: cursorMap[dir] }}
-                      onPointerDown={(e) => handleResize(e, widget, dir)}
+                      style={{ ...s, cursor: cur[dir] }}
+                      onPointerDown={(e) => handleResize(e, w, dir)}
                     >
                       {dir.length === 2 && (
-                        <div className="w-2 h-2 rounded-full bg-accent/60 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                        <div className="w-2.5 h-2.5 rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                          style={{ background: 'hsl(var(--accent) / 0.5)' }}
+                        />
                       )}
                     </div>
                   );
