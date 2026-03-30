@@ -47,6 +47,7 @@ function loadSettings(): MonolithSettings {
         layout: migrateLayout(parsed),
         themeIndex: parsed.themeIndex ?? 0,
         accentIndex: parsed.accentIndex ?? 0,
+        brightness: parsed.brightness ?? 100,
       };
     }
   } catch { /* ignore */ }
