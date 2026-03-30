@@ -51,7 +51,7 @@ function loadSettings(): MonolithSettings {
       };
     }
   } catch { /* ignore */ }
-  return { layout: DEFAULT_LAYOUT, themeIndex: 0, accentIndex: 0 };
+  return { layout: DEFAULT_LAYOUT, themeIndex: 0, accentIndex: 0, brightness: 100 };
 }
 
 function saveSettings(s: MonolithSettings) {
