@@ -7,6 +7,7 @@ interface MonolithSettings {
   layout: DashboardLayout;
   themeIndex: number;
   accentIndex: number;
+  brightness: number;
 }
 
 function migrateLayout(raw: any): DashboardLayout {
