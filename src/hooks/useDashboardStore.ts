@@ -129,15 +129,21 @@ export function useDashboardStore() {
     setSettings(prev => ({ ...prev, accentIndex: (prev.accentIndex + 1) % ACCENT_COLORS.length }));
   }, []);
 
+  const setBrightness = useCallback((val: number) => {
+    setSettings(prev => ({ ...prev, brightness: val }));
+  }, []);
+
   return {
     layout: settings.layout,
     themeIndex: settings.themeIndex,
     accentIndex: settings.accentIndex,
+    brightness: settings.brightness,
     setLayout,
     updateWidget,
     addWidget,
     removeWidget,
     cycleTheme,
     cycleAccent,
+    setBrightness,
   };
 }

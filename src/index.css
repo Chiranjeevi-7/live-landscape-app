@@ -330,7 +330,7 @@
 
   /* ─── Control dock ─── */
   .control-dock {
-    background: hsl(var(--surface));
+    background: hsl(var(--surface) / 0.9);
     border: 1px solid hsl(var(--border));
     border-radius: 100px;
     padding: 6px;
@@ -339,6 +339,13 @@
     gap: 4px;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* ─── Corner buttons ─── */
+  .corner-btn {
+    position: absolute;
+    z-index: 50;
+    transition: opacity 0.4s var(--easing);
   }
 
   /* ─── Progress bar ─── */
