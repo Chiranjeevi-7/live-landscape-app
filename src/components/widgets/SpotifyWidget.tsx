@@ -1,8 +1,8 @@
-import { Play, Pause, SkipBack, SkipForward, Music } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Music, LogOut } from 'lucide-react';
 import { useSpotify } from '@/hooks/useSpotify';
 
 export default function SpotifyWidget() {
-  const { connected, loading, track, connect, play, pause, next, prev } = useSpotify();
+  const { connected, loading, track, connect, disconnect, play, pause, next, prev, getInterpolatedProgress } = useSpotify();
 
   if (!connected) {
     return (
@@ -20,6 +20,8 @@ export default function SpotifyWidget() {
     );
   }
 
+  const progress = track ? (getInterpolatedProgress() / track.duration) * 100 : 0;
+
   return (
     <div className="flex flex-col items-center justify-center h-full w-full gap-3 p-4">
       {track ? (
@@ -36,7 +38,20 @@ export default function SpotifyWidget() {
               <div className="text-sm font-medium text-foreground truncate">{track.name}</div>
               <div className="text-xs text-muted-foreground truncate">{track.artist}</div>
             </div>
+            <button
+              onClick={(e) => { e.stopPropagation(); disconnect(); }}
+              className="btn-icon w-7 h-7 opacity-50 hover:opacity-100"
+              title="Disconnect"
+            >
+              <LogOut className="w-3 h-3" />
+            </button>
           </div>
+
+          {/* Progress bar */}
+          <div className="w-full progress-track">
+            <div className="progress-fill" style={{ width: `${Math.min(progress, 100)}%` }} />
+          </div>
+
           <div className="flex items-center gap-2">
             <button onClick={(e) => { e.stopPropagation(); prev(); }} className="btn-icon w-8 h-8"><SkipBack className="w-4 h-4" /></button>
             <button
