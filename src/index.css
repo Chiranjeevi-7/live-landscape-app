@@ -4,31 +4,31 @@
 
 @layer base {
   :root {
-    --bg: 228 12% 4%;
-    --background: 228 12% 4%;
-    --foreground: 220 20% 97%;
-    --surface: 220 15% 12%;
-    --surface-bright: 220 14% 16%;
-    --surface-hover: 220 14% 20%;
-    --card: 220 15% 10%;
-    --card-foreground: 220 20% 97%;
-    --popover: 220 15% 8%;
-    --popover-foreground: 220 20% 97%;
-    --primary: 217 91% 60%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 14%;
-    --secondary-foreground: 220 20% 97%;
-    --muted: 220 14% 14%;
-    --muted-foreground: 220 10% 55%;
-    --accent: 217 91% 60%;
-    --accent-foreground: 0 0% 100%;
-    --accent-glow: 217 91% 60% / 0.12;
-    --accent-subtle: 217 91% 60% / 0.06;
-    --destructive: 0 84% 60%;
+    --bg: 0 0% 2%;
+    --background: 0 0% 2%;
+    --foreground: 0 0% 92%;
+    --surface: 0 0% 8%;
+    --surface-bright: 0 0% 12%;
+    --surface-hover: 0 0% 16%;
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 92%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 92%;
+    --primary: 0 0% 75%;
+    --primary-foreground: 0 0% 2%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 92%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 75%;
+    --accent-foreground: 0 0% 2%;
+    --accent-glow: 0 0% 75% / 0.08;
+    --accent-subtle: 0 0% 75% / 0.04;
+    --destructive: 0 60% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 14% 14%;
-    --input: 220 14% 16%;
-    --ring: 217 91% 60%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
+    --ring: 0 0% 75%;
     --radius: 20px;
     --sidebar-background: 220 15% 6%;
     --sidebar-foreground: 220 20% 97%;
@@ -330,7 +330,7 @@
 
   /* ─── Control dock ─── */
   .control-dock {
-    background: hsl(var(--surface));
+    background: hsl(var(--surface) / 0.9);
     border: 1px solid hsl(var(--border));
     border-radius: 100px;
     padding: 6px;
@@ -339,6 +339,13 @@
     gap: 4px;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* ─── Corner buttons ─── */
+  .corner-btn {
+    position: absolute;
+    z-index: 50;
+    transition: opacity 0.4s var(--easing);
   }
 
   /* ─── Progress bar ─── */

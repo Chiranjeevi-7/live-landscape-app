@@ -7,6 +7,7 @@ interface MonolithSettings {
   layout: DashboardLayout;
   themeIndex: number;
   accentIndex: number;
+  brightness: number;
 }
 
 function migrateLayout(raw: any): DashboardLayout {
@@ -46,10 +47,11 @@ function loadSettings(): MonolithSettings {
         layout: migrateLayout(parsed),
         themeIndex: parsed.themeIndex ?? 0,
         accentIndex: parsed.accentIndex ?? 0,
+        brightness: parsed.brightness ?? 100,
       };
     }
   } catch { /* ignore */ }
-  return { layout: DEFAULT_LAYOUT, themeIndex: 0, accentIndex: 0 };
+  return { layout: DEFAULT_LAYOUT, themeIndex: 0, accentIndex: 0, brightness: 100 };
 }
 
 function saveSettings(s: MonolithSettings) {
@@ -127,15 +129,21 @@ export function useDashboardStore() {
     setSettings(prev => ({ ...prev, accentIndex: (prev.accentIndex + 1) % ACCENT_COLORS.length }));
   }, []);
 
+  const setBrightness = useCallback((val: number) => {
+    setSettings(prev => ({ ...prev, brightness: val }));
+  }, []);
+
   return {
     layout: settings.layout,
     themeIndex: settings.themeIndex,
     accentIndex: settings.accentIndex,
+    brightness: settings.brightness,
     setLayout,
     updateWidget,
     addWidget,
     removeWidget,
     cycleTheme,
     cycleAccent,
+    setBrightness,
   };
 }
