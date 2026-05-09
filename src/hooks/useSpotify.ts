@@ -13,6 +13,7 @@ export interface SpotifyTrack {
   progress: number;
   duration: number;
   isPlaying: boolean;
+  shuffle: boolean;
 }
 
 interface SpotifyTokens {
@@ -111,7 +112,7 @@ export function useSpotify() {
   }, [getValidToken]);
 
   const fetchCurrentTrack = useCallback(async () => {
-    const data = await spotifyApi('/me/player/currently-playing');
+    const data = await spotifyApi('/me/player');
     if (!data || !data.item) {
       setTrack(null);
       return;
@@ -132,6 +133,7 @@ export function useSpotify() {
       progress: serverProgress,
       duration: data.item.duration_ms || 0,
       isPlaying: data.is_playing,
+      shuffle: !!data.shuffle_state,
     });
   }, [spotifyApi]);
 
@@ -231,6 +233,14 @@ export function useSpotify() {
     setTimeout(fetchCurrentTrack, 500);
   }, [spotifyApi, fetchCurrentTrack]);
 
+  const toggleShuffle = useCallback(async () => {
+    const next = !track?.shuffle;
+    // Optimistic
+    setTrack(t => t ? { ...t, shuffle: next } : t);
+    await spotifyApi(`/me/player/shuffle?state=${next}`, 'PUT');
+    setTimeout(fetchCurrentTrack, 300);
+  }, [spotifyApi, track?.shuffle, fetchCurrentTrack]);
+
   return {
     connected,
     loading,
@@ -241,6 +251,7 @@ export function useSpotify() {
     pause,
     next,
     prev,
+    toggleShuffle,
     getInterpolatedProgress,
   };
 }
