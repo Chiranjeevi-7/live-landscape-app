@@ -14,6 +14,8 @@ export interface SpotifyTrack {
   duration: number;
   isPlaying: boolean;
   shuffle: boolean;
+  volume: number; // 0-100
+  device: string;
 }
 
 interface SpotifyTokens {
@@ -134,6 +136,8 @@ export function useSpotify() {
       duration: data.item.duration_ms || 0,
       isPlaying: data.is_playing,
       shuffle: !!data.shuffle_state,
+      volume: data.device?.volume_percent ?? 50,
+      device: data.device?.name || '',
     });
   }, [spotifyApi]);
 
@@ -241,6 +245,12 @@ export function useSpotify() {
     setTimeout(fetchCurrentTrack, 300);
   }, [spotifyApi, track?.shuffle, fetchCurrentTrack]);
 
+  const setVolume = useCallback(async (vol: number) => {
+    const v = Math.max(0, Math.min(100, Math.round(vol)));
+    setTrack(t => t ? { ...t, volume: v } : t);
+    await spotifyApi(`/me/player/volume?volume_percent=${v}`, 'PUT');
+  }, [spotifyApi]);
+
   return {
     connected,
     loading,
@@ -252,6 +262,7 @@ export function useSpotify() {
     next,
     prev,
     toggleShuffle,
+    setVolume,
     getInterpolatedProgress,
   };
 }
