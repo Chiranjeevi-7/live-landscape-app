@@ -3,7 +3,7 @@ import { useDashboardStore } from '@/hooks/useDashboardStore';
 import AmbientVisualizer from '@/components/AmbientVisualizer';
 import FreeformCanvas from '@/components/FreeformCanvas';
 import WidgetPicker from '@/components/WidgetPicker';
-import { Palette, Lock, Unlock, Plus, Eye, EyeOff, Sun, Moon } from 'lucide-react';
+import { Palette, Lock, Unlock, Plus, Sun, Moon } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
 export default function Dashboard() {
@@ -11,7 +11,6 @@ export default function Dashboard() {
   const [showUI, setShowUI] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
-  const [focusMode, setFocusMode] = useState(false);
   const uiTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Wake lock
@@ -37,9 +36,7 @@ export default function Dashboard() {
     uiTimeout.current = setTimeout(() => setShowUI(false), 5000);
   }, [editMode]);
 
-  const visibleWidgets = focusMode
-    ? layout.widgets.filter(w => w.type === 'clock' || w.type === 'date' || w.type === 'pomodoro')
-    : layout.widgets;
+  const visibleWidgets = layout.widgets;
 
   const visible = showUI || editMode;
 
@@ -82,19 +79,6 @@ export default function Dashboard() {
           title="Theme"
         >
           <Palette className="w-4 h-4" />
-        </button>
-      </div>
-
-      {/* ─── TOP-RIGHT: Focus Mode ─── */}
-      <div
-        className={`corner-btn top-4 right-4 ${visible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-      >
-        <button
-          onClick={(e) => { e.stopPropagation(); setFocusMode(!focusMode); }}
-          className={`btn-icon ${focusMode ? 'accent' : ''}`}
-          title="Focus Mode"
-        >
-          {focusMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
         </button>
       </div>
 
