@@ -46,20 +46,23 @@ export default function ClockSettingsPanel({ settings, onChange, onClose }: Prop
   const panelStyle: React.CSSProperties = {};
   if (parentRect) {
     const pw = parentRect.width;
-    const ph = parentRect.height;
-    panelStyle.maxWidth = `${Math.min(480, Math.max(280, pw - 32))}px`;
-    panelStyle.maxHeight = `${Math.max(300, ph - 32)}px`;
+    panelStyle.width = `${Math.min(480, Math.max(240, pw - 24))}px`;
+    panelStyle.maxHeight = 'calc(100% - 24px)';
+    panelStyle.minHeight = 0;
   }
 
   return (
-    <div ref={panelRef} className="absolute inset-0 z-50 flex items-center justify-center" style={{ background: 'hsl(0 0% 0% / 0.6)' }}>
+    <div ref={panelRef} className="absolute inset-0 z-50 flex items-center justify-center p-3" style={{ background: 'hsl(0 0% 0% / 0.6)' }}>
       <div className="absolute inset-0" onClick={(e) => { e.stopPropagation(); onClose(); }}>
         <X className="absolute top-3 right-3 w-5 h-5 cursor-pointer text-foreground/60 hover:text-foreground" />
       </div>
       <div
-        className="relative rounded-2xl p-5 overflow-y-auto space-y-4 scrollbar-hide"
-        style={{ background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', WebkitOverflowScrolling: 'touch', ...panelStyle }}
+        className="relative z-10 rounded-2xl p-5 overflow-y-auto space-y-4 scrollbar-hide"
+        style={{ background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', touchAction: 'pan-y', ...panelStyle }}
         onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+        onWheel={(e) => e.stopPropagation()}
       >
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
 
