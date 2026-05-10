@@ -45,6 +45,7 @@ export const THEMES: ThemeConfig[] = [
   { name: 'Ocean', className: 'theme-ocean' },
   { name: 'Sunset', className: 'theme-sunset' },
   { name: 'Midnight', className: 'theme-midnight' },
+  { name: 'Glass', className: 'theme-glass' },
 ];
 
 export const ACCENT_COLORS = [
