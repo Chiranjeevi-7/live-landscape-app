@@ -16,6 +16,7 @@ export interface SpotifyTrack {
   shuffle: boolean;
   volume: number; // 0-100
   device: string;
+  repeat: 'off' | 'context' | 'track';
 }
 
 interface SpotifyTokens {
@@ -138,6 +139,7 @@ export function useSpotify() {
       shuffle: !!data.shuffle_state,
       volume: data.device?.volume_percent ?? 50,
       device: data.device?.name || '',
+      repeat: (data.repeat_state as 'off' | 'context' | 'track') || 'off',
     });
   }, [spotifyApi]);
 
@@ -251,6 +253,15 @@ export function useSpotify() {
     await spotifyApi(`/me/player/volume?volume_percent=${v}`, 'PUT');
   }, [spotifyApi]);
 
+  const cycleRepeat = useCallback(async () => {
+    const order: Array<'off' | 'context' | 'track'> = ['off', 'context', 'track'];
+    const cur = track?.repeat || 'off';
+    const nxt = order[(order.indexOf(cur) + 1) % order.length];
+    setTrack(t => t ? { ...t, repeat: nxt } : t);
+    await spotifyApi(`/me/player/repeat?state=${nxt}`, 'PUT');
+    setTimeout(fetchCurrentTrack, 300);
+  }, [spotifyApi, track?.repeat, fetchCurrentTrack]);
+
   return {
     connected,
     loading,
@@ -263,6 +274,7 @@ export function useSpotify() {
     prev,
     toggleShuffle,
     setVolume,
+    cycleRepeat,
     getInterpolatedProgress,
   };
 }
