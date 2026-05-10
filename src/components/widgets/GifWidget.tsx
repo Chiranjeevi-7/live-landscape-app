@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { Image as ImageIcon, Upload, Link2, Trash2, X } from 'lucide-react';
+import { Image as ImageIcon, Upload, Trash2, X, AlertCircle } from 'lucide-react';
 
 const STORAGE_KEY = 'monolith_gif_widget_media';
 
 interface SavedMedia {
-  src: string;       // url or dataURL
-  kind: 'url' | 'file';
+  src: string;       // dataURL only
+  kind: 'file';
 }
 
 function loadMedia(): SavedMedia | null {
@@ -23,41 +23,49 @@ function saveMedia(m: SavedMedia | null) {
 export default function GifWidget() {
   const [media, setMedia] = useState<SavedMedia | null>(() => loadMedia());
   const [editing, setEditing] = useState(false);
-  const [urlInput, setUrlInput] = useState('');
   const [loaded, setLoaded] = useState(false);
+  const [errMsg, setErrMsg] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { saveMedia(media); }, [media]);
   useEffect(() => { setLoaded(false); }, [media?.src]);
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setErrMsg(null);
     const file = e.target.files?.[0];
-    if (!file) return;
-    if (!/^image\/(jpeg|png|webp|gif)$/.test(file.type)) return;
+    if (!file) { setErrMsg('No file selected'); return; }
+    // Some old Android WebViews don't set file.type — fall back to extension check
+    const name = (file.name || '').toLowerCase();
+    const okType = /^image\/(jpeg|png|webp|gif)$/.test(file.type);
+    const okExt = /\.(jpe?g|png|webp|gif)$/i.test(name);
+    if (!okType && !okExt) { setErrMsg('Unsupported file (use JPG/PNG/WEBP/GIF)'); return; }
+    if (file.size > 8 * 1024 * 1024) { setErrMsg('File too large (max 8MB)'); return; }
     const reader = new FileReader();
     reader.onload = () => {
       setMedia({ src: reader.result as string, kind: 'file' });
       setEditing(false);
     };
+    reader.onerror = () => setErrMsg('Failed to read file');
     reader.readAsDataURL(file);
-  };
-
-  const saveUrl = () => {
-    const v = urlInput.trim();
-    if (!v) return;
-    setMedia({ src: v, kind: 'url' });
-    setUrlInput('');
-    setEditing(false);
+    // reset input so same file can be picked again
+    if (fileRef.current) fileRef.current.value = '';
   };
 
   const clear = () => {
     setMedia(null);
     setEditing(false);
+    setErrMsg(null);
   };
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden relative" style={{ borderRadius: 'inherit' }}>
-      <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleFile} />
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFile}
+      />
 
       {/* Media or placeholder */}
       <div className="flex-1 min-h-0 overflow-hidden relative" style={{ borderRadius: 'inherit' }}>
@@ -110,17 +118,11 @@ export default function GifWidget() {
             <Upload className="w-3.5 h-3.5" /> Upload from device
           </button>
 
-          <div className="flex gap-2 items-center">
-            <Link2 className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-            <input
-              value={urlInput}
-              onChange={(e) => setUrlInput(e.target.value)}
-              className="input-native flex-1 py-2 text-sm min-w-0"
-              placeholder="Paste image / GIF URL"
-              onKeyDown={(e) => e.key === 'Enter' && saveUrl()}
-            />
-            <button onClick={saveUrl} className="btn-native accent text-xs py-2">Save</button>
-          </div>
+          {errMsg && (
+            <div className="flex items-center gap-1.5 text-[0.7rem]" style={{ color: 'hsl(var(--destructive))' }}>
+              <AlertCircle className="w-3 h-3 shrink-0" /> {errMsg}
+            </div>
+          )}
 
           {media && (
             <button
@@ -131,7 +133,7 @@ export default function GifWidget() {
               <Trash2 className="w-3.5 h-3.5" /> Remove
             </button>
           )}
-          <p className="text-[0.65rem] text-muted-foreground/70 text-center">JPG · PNG · WEBP · GIF</p>
+          <p className="text-[0.65rem] text-muted-foreground/70 text-center">JPG · PNG · WEBP · GIF · saved on device</p>
         </div>
       )}
     </div>
