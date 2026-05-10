@@ -56,7 +56,11 @@ export default function ClockSettingsPanel({ settings, onChange, onClose }: Prop
       <div className="absolute inset-0" onClick={(e) => { e.stopPropagation(); onClose(); }}>
         <X className="absolute top-3 right-3 w-5 h-5 cursor-pointer text-foreground/60 hover:text-foreground" />
       </div>
-      <div className="relative rounded-2xl p-5 overflow-y-auto space-y-4" style={{ background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', ...panelStyle }} onClick={(e) => e.stopPropagation()}>
+      <div
+        className="relative rounded-2xl p-5 overflow-y-auto space-y-4 scrollbar-hide"
+        style={{ background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', WebkitOverflowScrolling: 'touch', ...panelStyle }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
 
         <h3 className="text-sm font-semibold text-foreground">Clock Settings</h3>
