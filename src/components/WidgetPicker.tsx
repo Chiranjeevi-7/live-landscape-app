@@ -1,11 +1,11 @@
 import { X } from 'lucide-react';
 import { WidgetType, WidgetConfig, WIDGET_LABELS, generateWidgetId } from '@/types/dashboard';
 
-const ALL_TYPES: WidgetType[] = ['clock', 'date', 'timer', 'stopwatch', 'spotify', 'lyrics', 'gif', 'weather', 'pomodoro', 'notes'];
+const ALL_TYPES: WidgetType[] = ['clock', 'date', 'timer', 'stopwatch', 'spotify', 'lyrics', 'gif', 'weather', 'pomodoro', 'notes', 'lights'];
 
 const ICONS: Record<WidgetType, string> = {
   clock: '⏰', date: '📅', timer: '⏱️', stopwatch: '🏃', spotify: '🎵',
-  lyrics: '📝', gif: '🖼️', weather: '🌤️', pomodoro: '🍅', notes: '📋',
+  lyrics: '📝', gif: '🖼️', weather: '🌤️', pomodoro: '🍅', notes: '📋', lights: '💡',
 };
 
 interface Props {
