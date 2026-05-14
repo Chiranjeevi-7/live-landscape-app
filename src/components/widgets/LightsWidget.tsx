@@ -239,3 +239,114 @@ export default function LightsWidget() {
     </div>
   );
 }
+
+const BACKENDS: { key: LightBackend; label: string }[] = [
+  { key: 'none',           label: 'Off' },
+  { key: 'webhook',        label: 'Webhook' },
+  { key: 'home_assistant', label: 'Home Asst' },
+  { key: 'google',         label: 'Google' },
+];
+
+function Field({ label, value, onChange, placeholder, type = 'text' }: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  type?: string;
+}) {
+  return (
+    <label className="flex flex-col gap-0.5">
+      <span className="text-[9px] uppercase tracking-wider text-muted-foreground">{label}</span>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="text-[11px] px-2 py-1 rounded-md outline-none"
+        style={{
+          background: 'hsl(var(--surface))',
+          border: '1px solid hsl(var(--border))',
+          color: 'hsl(var(--foreground))',
+        }}
+      />
+    </label>
+  );
+}
+
+function SettingsPanel({
+  settings, onChange, onClose,
+}: {
+  settings: ReturnType<typeof useLights>['settings'];
+  onChange: (patch: Partial<ReturnType<typeof useLights>['settings']>) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="relative rounded-lg p-2.5 flex flex-col gap-2 animate-fade-in"
+      style={{ background: 'hsl(var(--surface-bright))', border: '1px solid hsl(var(--border))' }}
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Backend</span>
+        <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+          <X className="w-3 h-3" />
+        </button>
+      </div>
+      <div className="grid grid-cols-4 gap-1">
+        {BACKENDS.map(b => {
+          const active = settings.backend === b.key;
+          return (
+            <button
+              key={b.key}
+              onClick={() => onChange({ backend: b.key })}
+              className="py-1 rounded-md text-[10px] transition-all active:scale-95"
+              style={{
+                background: active ? 'hsl(var(--foreground))' : 'hsl(var(--surface))',
+                color: active ? 'hsl(var(--background))' : 'hsl(var(--foreground))',
+                border: '1px solid hsl(var(--border))',
+              }}
+            >{b.label}</button>
+          );
+        })}
+      </div>
+
+      {settings.backend === 'webhook' && (
+        <div className="flex flex-col gap-1.5">
+          <Field label="Webhook URL" value={settings.webhook?.url || ''}
+            onChange={(v) => onChange({ webhook: { ...settings.webhook, url: v } })}
+            placeholder="https://..." />
+          <Field label="Auth token (optional)" value={settings.webhook?.token || ''} type="password"
+            onChange={(v) => onChange({ webhook: { ...settings.webhook, token: v } })} />
+        </div>
+      )}
+
+      {settings.backend === 'home_assistant' && (
+        <div className="flex flex-col gap-1.5">
+          <Field label="Base URL" value={settings.home_assistant?.baseUrl || ''}
+            onChange={(v) => onChange({ home_assistant: { ...settings.home_assistant, baseUrl: v } })}
+            placeholder="http://192.168.1.10:8123" />
+          <Field label="Long-lived token" value={settings.home_assistant?.token || ''} type="password"
+            onChange={(v) => onChange({ home_assistant: { ...settings.home_assistant, token: v } })} />
+          <Field label="Entity ID" value={settings.home_assistant?.entityId || ''}
+            onChange={(v) => onChange({ home_assistant: { ...settings.home_assistant, entityId: v } })}
+            placeholder="light.magic_home_strip" />
+        </div>
+      )}
+
+      {settings.backend === 'google' && (
+        <div className="flex flex-col gap-1.5">
+          <p className="text-[9px] text-muted-foreground leading-tight">
+            Uses an Assistant-Relay endpoint. Posts a natural-language command for your Google Home device.
+          </p>
+          <Field label="Relay URL" value={settings.google?.relayUrl || ''}
+            onChange={(v) => onChange({ google: { ...settings.google, relayUrl: v } })}
+            placeholder="https://relay.example.com/assistant" />
+          <Field label="Auth token (optional)" value={settings.google?.token || ''} type="password"
+            onChange={(v) => onChange({ google: { ...settings.google, token: v } })} />
+          <Field label="Device name (as in Home app)" value={settings.google?.deviceName || ''}
+            onChange={(v) => onChange({ google: { ...settings.google, deviceName: v } })}
+            placeholder="bedroom strip" />
+        </div>
+      )}
+    </div>
+  );
+}
