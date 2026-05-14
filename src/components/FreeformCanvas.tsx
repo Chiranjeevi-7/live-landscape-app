@@ -27,7 +27,7 @@ function snap(v: number): number {
 
 type Dir = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
 
-const TYPES: WidgetType[] = ['clock', 'date', 'timer', 'stopwatch', 'spotify', 'lyrics', 'gif', 'weather', 'pomodoro', 'notes'];
+const TYPES: WidgetType[] = ['clock', 'date', 'timer', 'stopwatch', 'spotify', 'lyrics', 'gif', 'weather', 'pomodoro', 'notes', 'lights'];
 
 interface Props {
   widgets: WidgetConfig[];
