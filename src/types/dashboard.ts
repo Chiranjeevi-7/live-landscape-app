@@ -1,4 +1,4 @@
-export type WidgetType = 'clock' | 'date' | 'timer' | 'stopwatch' | 'spotify' | 'lyrics' | 'gif' | 'weather' | 'pomodoro' | 'notes';
+export type WidgetType = 'clock' | 'date' | 'timer' | 'stopwatch' | 'spotify' | 'lyrics' | 'gif' | 'weather' | 'pomodoro' | 'notes' | 'lights';
 
 export type WidgetShape = 'rectangle' | 'rounded' | 'squircle' | 'circle' | 'edge-to-edge';
 
@@ -69,6 +69,7 @@ export const WIDGET_LABELS: Record<WidgetType, string> = {
   weather: 'Weather',
   pomodoro: 'Pomodoro',
   notes: 'Notes / Todo',
+  lights: 'Ambient Lights',
 };
 
 export const SHAPE_LABELS: Record<WidgetShape, string> = {
