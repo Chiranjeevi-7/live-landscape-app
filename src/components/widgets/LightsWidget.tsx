@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Power, Sun, Palette, Thermometer } from 'lucide-react';
+import { Power, Sun, Palette, Thermometer, Settings, X } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
-import { useLights, SCENE_PRESETS, type ScenePreset, type LightMode } from '@/hooks/useLights';
+import { useLights, SCENE_PRESETS, type ScenePreset, type LightMode, type LightBackend } from '@/hooks/useLights';
 
 const SCENES: { key: ScenePreset; label: string; tint: string }[] = [
   { key: 'focus',  label: 'Focus',  tint: '#cfe6ff' },
@@ -29,9 +29,10 @@ function effectiveColor(color: string, warmth: number, mode: LightMode): string 
 }
 
 export default function LightsWidget() {
-  const { state, togglePower, setBrightness, setColor, setWarmth, setMode, applyScene } = useLights();
+  const { state, settings, togglePower, setBrightness, setColor, setWarmth, setMode, applyScene, setSettings } = useLights();
   const wrapRef = useRef<HTMLDivElement>(null);
   const [compact, setCompact] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -73,9 +74,9 @@ export default function LightsWidget() {
         }}
       />
 
-      {/* Header: indicator + power */}
-      <div className="relative flex items-center justify-between">
-        <div className="flex items-center gap-2 min-w-0">
+      {/* Header: indicator + settings + power */}
+      <div className="relative flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           <div
             className="w-3 h-3 rounded-full transition-all duration-300"
             style={{
@@ -86,7 +87,22 @@ export default function LightsWidget() {
           <span className="text-xs font-medium text-foreground/80 truncate">
             {state.on ? (state.scene ? state.scene.charAt(0).toUpperCase() + state.scene.slice(1) : 'On') : 'Off'}
           </span>
+          {settings.backend !== 'none' && (
+            <span className="text-[9px] uppercase tracking-wider text-muted-foreground/70 truncate">
+              · {settings.backend === 'home_assistant' ? 'HA' : settings.backend}
+            </span>
+          )}
         </div>
+        {!compact && (
+          <button
+            onClick={() => setShowSettings(s => !s)}
+            className="rounded-full p-1.5 transition-all active:scale-90 text-muted-foreground hover:text-foreground"
+            style={{ background: 'hsl(var(--surface-bright))' }}
+            title="Backend settings"
+          >
+            <Settings className="w-3 h-3" />
+          </button>
+        )}
         <button
           onClick={togglePower}
           className="rounded-full p-2 transition-all active:scale-90"
@@ -99,6 +115,14 @@ export default function LightsWidget() {
           <Power className="w-3.5 h-3.5" />
         </button>
       </div>
+
+      {showSettings && !compact && (
+        <SettingsPanel
+          settings={settings}
+          onChange={setSettings}
+          onClose={() => setShowSettings(false)}
+        />
+      )}
 
       {/* Brightness — always visible */}
       <div className="relative flex items-center gap-2">
