@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Smart light controller hook.
@@ -16,6 +17,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 export type LightMode = 'color' | 'white';
 export type ScenePreset = 'focus' | 'chill' | 'night' | 'movie' | 'music';
 
+export type LightBackend = 'none' | 'webhook' | 'home_assistant' | 'google';
+
+export interface LightSettings {
+  backend: LightBackend;
+  webhook?: { url?: string; token?: string };
+  home_assistant?: { baseUrl?: string; token?: string; entityId?: string };
+  google?: { relayUrl?: string; token?: string; deviceName?: string };
+}
+
 export interface LightState {
   on: boolean;
   brightness: number;   // 0-100
@@ -26,6 +36,7 @@ export interface LightState {
 }
 
 const STORAGE_KEY = 'monolith_lights_state';
+const SETTINGS_KEY = 'monolith_lights_settings';
 
 const DEFAULT_STATE: LightState = {
   on: false,
@@ -34,6 +45,8 @@ const DEFAULT_STATE: LightState = {
   warmth: 60,
   mode: 'color',
 };
+
+const DEFAULT_SETTINGS: LightSettings = { backend: 'none' };
 
 export const SCENE_PRESETS: Record<ScenePreset, Partial<LightState>> = {
   focus:  { on: true, mode: 'white', warmth: 20, brightness: 100 },
@@ -51,9 +64,21 @@ function load(): LightState {
   return DEFAULT_STATE;
 }
 
+function loadSettings(): LightSettings {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (raw) return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+  } catch {}
+  return DEFAULT_SETTINGS;
+}
+
 export function useLights() {
   const [state, setState] = useState<LightState>(load);
+  const [settings, setSettingsState] = useState<LightSettings>(loadSettings);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dispatchRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
 
   // Persist (debounced for slider drags so we don't thrash localStorage on old phones)
   useEffect(() => {
@@ -64,11 +89,37 @@ export function useLights() {
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [state]);
 
-  // Single point of integration with the real bulb backend.
+  useEffect(() => {
+    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch {}
+  }, [settings]);
+
+  // Single point of integration. Debounced + fire-and-forget so slider drags
+  // stay buttery on old Android WebViews. Routes through the lights-control
+  // edge function which knows how to speak to each backend.
   const dispatch = useCallback((next: LightState) => {
-    // TODO: call Magic Home LAN bridge or Google Home relay here.
-    // Keep it fire-and-forget so the UI stays smooth.
-    // console.debug('[lights] dispatch', next);
+    const s = settingsRef.current;
+    if (!s || s.backend === 'none') return;
+    if (dispatchRef.current) clearTimeout(dispatchRef.current);
+    dispatchRef.current = setTimeout(() => {
+      const config =
+        s.backend === 'webhook' ? s.webhook :
+        s.backend === 'home_assistant' ? s.home_assistant :
+        s.backend === 'google' ? s.google : {};
+      supabase.functions.invoke('lights-control', {
+        body: {
+          backend: s.backend,
+          config: config || {},
+          command: {
+            on: next.on,
+            brightness: next.brightness,
+            color: next.color,
+            warmth: next.warmth,
+            mode: next.mode,
+            scene: next.scene,
+          },
+        },
+      }).catch(() => { /* offline-tolerant */ });
+    }, 120);
   }, []);
 
   const update = useCallback((patch: Partial<LightState>) => {
@@ -86,5 +137,9 @@ export function useLights() {
   const setMode        = useCallback((m: LightMode) => update({ mode: m }), [update]);
   const applyScene     = useCallback((s: ScenePreset) => update({ ...SCENE_PRESETS[s], scene: s }), [update]);
 
-  return { state, togglePower, setBrightness, setColor, setWarmth, setMode, applyScene };
+  const setSettings = useCallback((patch: Partial<LightSettings>) => {
+    setSettingsState(prev => ({ ...prev, ...patch }));
+  }, []);
+
+  return { state, settings, togglePower, setBrightness, setColor, setWarmth, setMode, applyScene, setSettings };
 }
