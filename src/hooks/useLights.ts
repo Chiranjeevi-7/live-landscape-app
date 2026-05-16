@@ -17,10 +17,11 @@ import { supabase } from '@/integrations/supabase/client';
 export type LightMode = 'color' | 'white';
 export type ScenePreset = 'focus' | 'chill' | 'night' | 'movie' | 'music';
 
-export type LightBackend = 'none' | 'webhook' | 'home_assistant' | 'google';
+export type LightBackend = 'none' | 'magic_home' | 'webhook' | 'home_assistant' | 'google';
 
 export interface LightSettings {
   backend: LightBackend;
+  magic_home?: { ip?: string; port?: number; bridgeUrl?: string };
   webhook?: { url?: string; token?: string };
   home_assistant?: { baseUrl?: string; token?: string; entityId?: string };
   google?: { relayUrl?: string; token?: string; deviceName?: string };
@@ -46,7 +47,10 @@ const DEFAULT_STATE: LightState = {
   mode: 'color',
 };
 
-const DEFAULT_SETTINGS: LightSettings = { backend: 'none' };
+const DEFAULT_SETTINGS: LightSettings = {
+  backend: 'magic_home',
+  magic_home: { ip: '192.168.68.110', port: 8080 },
+};
 
 export const SCENE_PRESETS: Record<ScenePreset, Partial<LightState>> = {
   focus:  { on: true, mode: 'white', warmth: 20, brightness: 100 },
@@ -102,6 +106,7 @@ export function useLights() {
     if (dispatchRef.current) clearTimeout(dispatchRef.current);
     dispatchRef.current = setTimeout(() => {
       const config =
+        s.backend === 'magic_home' ? s.magic_home :
         s.backend === 'webhook' ? s.webhook :
         s.backend === 'home_assistant' ? s.home_assistant :
         s.backend === 'google' ? s.google : {};
@@ -119,7 +124,7 @@ export function useLights() {
           },
         },
       }).catch(() => { /* offline-tolerant */ });
-    }, 120);
+    }, 90);
   }, []);
 
   const update = useCallback((patch: Partial<LightState>) => {
