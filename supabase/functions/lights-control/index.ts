@@ -114,6 +114,27 @@ async function callGoogle(config: any, command: Command) {
   return { status: r.status, body: await r.text().catch(() => '') };
 }
 
+/**
+ * Magic Home / Flux LED via a local HTTP bridge.
+ * Supabase edge functions can't reach private LAN IPs (192.168.x.x) directly,
+ * so this only works when the user has exposed their bridge through a public
+ * tunnel (Tailscale Funnel, Cloudflare Tunnel, ngrok…) and pasted that URL
+ * as `bridgeUrl`. The client also tries the LAN address directly, so this
+ * path is just the relayed fallback.
+ */
+async function callMagicHome(config: any, command: Command) {
+  const url: string | undefined = config?.bridgeUrl;
+  if (!url) {
+    return { status: 200, body: 'client-LAN-only' };
+  }
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ source: 'monolith-dashboard', command }),
+  });
+  return { status: r.status, body: await r.text().catch(() => '') };
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -128,6 +149,7 @@ Deno.serve(async (req) => {
 
     let result: { status: number; body: string };
     switch (backend) {
+      case 'magic_home':     result = await callMagicHome(config || {}, command); break;
       case 'webhook':        result = await callWebhook(config || {}, command); break;
       case 'home_assistant': result = await callHomeAssistant(config || {}, command); break;
       case 'google':         result = await callGoogle(config || {}, command); break;
