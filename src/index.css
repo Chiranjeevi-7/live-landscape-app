@@ -492,3 +492,24 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* ─── Ambient light sync ─── */
+/* When the smart-light widget changes colour it sets these vars on :root
+   and the dashboard background tints subtly to match. Cheap, GPU-friendly. */
+:root {
+  --ambient-intensity: 0;
+}
+.bg-background::before,
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse at 50% 110%,
+    hsl(var(--ambient-glow, 0 0% 50%) / calc(var(--ambient-intensity) * 0.18)),
+    transparent 60%
+  );
+  transition: background 600ms var(--easing);
+}

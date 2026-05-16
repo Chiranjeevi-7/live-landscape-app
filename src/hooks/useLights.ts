@@ -17,10 +17,11 @@ import { supabase } from '@/integrations/supabase/client';
 export type LightMode = 'color' | 'white';
 export type ScenePreset = 'focus' | 'chill' | 'night' | 'movie' | 'music';
 
-export type LightBackend = 'none' | 'webhook' | 'home_assistant' | 'google';
+export type LightBackend = 'none' | 'magic_home' | 'webhook' | 'home_assistant' | 'google';
 
 export interface LightSettings {
   backend: LightBackend;
+  magic_home?: { ip?: string; port?: number; bridgeUrl?: string };
   webhook?: { url?: string; token?: string };
   home_assistant?: { baseUrl?: string; token?: string; entityId?: string };
   google?: { relayUrl?: string; token?: string; deviceName?: string };
@@ -46,7 +47,42 @@ const DEFAULT_STATE: LightState = {
   mode: 'color',
 };
 
-const DEFAULT_SETTINGS: LightSettings = { backend: 'none' };
+const DEFAULT_SETTINGS: LightSettings = {
+  backend: 'magic_home',
+  magic_home: { ip: '192.168.68.110', port: 8080 },
+};
+
+function hexToHslString(hex: string): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.slice(0, 2), 16) / 255;
+  const g = parseInt(h.slice(2, 4), 16) / 255;
+  const b = parseInt(h.slice(4, 6), 16) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let hh = 0, s = 0; const l = (max + min) / 2;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: hh = ((g - b) / d + (g < b ? 6 : 0)); break;
+      case g: hh = ((b - r) / d + 2); break;
+      case b: hh = ((r - g) / d + 4); break;
+    }
+    hh *= 60;
+  }
+  return `${Math.round(hh)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+}
+
+function applyAmbient(state: LightState, color: string) {
+  if (typeof document === 'undefined') return;
+  const root = document.documentElement;
+  if (!state.on) {
+    root.style.removeProperty('--ambient-glow');
+    root.style.setProperty('--ambient-intensity', '0');
+    return;
+  }
+  root.style.setProperty('--ambient-glow', hexToHslString(color));
+  root.style.setProperty('--ambient-intensity', String(Math.max(0.15, state.brightness / 100)));
+}
 
 export const SCENE_PRESETS: Record<ScenePreset, Partial<LightState>> = {
   focus:  { on: true, mode: 'white', warmth: 20, brightness: 100 },
@@ -93,6 +129,46 @@ export function useLights() {
     try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch {}
   }, [settings]);
 
+  // Ambient dashboard sync — drive a CSS variable so the rest of the UI can
+  // pick up the current light colour without subscribing to the hook.
+  useEffect(() => {
+    const tintColor = state.mode === 'white'
+      ? `#${
+          [
+            Math.round(0xcf + ((0xff - 0xcf) * state.warmth) / 100),
+            Math.round(0xe6 + ((0xb0 - 0xe6) * state.warmth) / 100),
+            Math.round(0xff + ((0x70 - 0xff) * state.warmth) / 100),
+          ].map(n => n.toString(16).padStart(2, '0')).join('')
+        }`
+      : state.color;
+    applyAmbient(state, tintColor);
+  }, [state]);
+
+  // Direct LAN reach — when the dashboard is on the same WiFi as the device
+  // we can hit a local HTTP bridge (flux_led_http / mqtt2magic / custom).
+  // No CORS preflight on simple POSTs with text/plain; bridges typically
+  // return 200 OK. Failures are silently swallowed.
+  const dispatchLAN = useCallback((cfg: any, next: LightState) => {
+    const url = cfg?.bridgeUrl || (cfg?.ip ? `http://${cfg.ip}:${cfg.port || 8080}/set` : '');
+    if (!url) return;
+    try {
+      fetch(url, {
+        method: 'POST',
+        mode: 'no-cors',
+        keepalive: true,
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          on: next.on,
+          brightness: next.brightness,
+          color: next.color,
+          warmth: next.warmth,
+          mode: next.mode,
+          scene: next.scene,
+        }),
+      }).catch(() => {});
+    } catch {}
+  }, []);
+
   // Single point of integration. Debounced + fire-and-forget so slider drags
   // stay buttery on old Android WebViews. Routes through the lights-control
   // edge function which knows how to speak to each backend.
@@ -102,9 +178,14 @@ export function useLights() {
     if (dispatchRef.current) clearTimeout(dispatchRef.current);
     dispatchRef.current = setTimeout(() => {
       const config =
+        s.backend === 'magic_home' ? s.magic_home :
         s.backend === 'webhook' ? s.webhook :
         s.backend === 'home_assistant' ? s.home_assistant :
         s.backend === 'google' ? s.google : {};
+      // Magic Home runs on the local LAN — try the device directly first.
+      if (s.backend === 'magic_home') {
+        dispatchLAN(config, next);
+      }
       supabase.functions.invoke('lights-control', {
         body: {
           backend: s.backend,
@@ -119,8 +200,8 @@ export function useLights() {
           },
         },
       }).catch(() => { /* offline-tolerant */ });
-    }, 120);
-  }, []);
+    }, 90);
+  }, [dispatchLAN]);
 
   const update = useCallback((patch: Partial<LightState>) => {
     setState(prev => {
