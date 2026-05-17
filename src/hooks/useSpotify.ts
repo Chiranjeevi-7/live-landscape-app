@@ -19,6 +19,14 @@ export interface SpotifyTrack {
   repeat: 'off' | 'context' | 'track';
 }
 
+export interface QueueItem {
+  uri: string;
+  id: string;
+  name: string;
+  artist: string;
+  albumArt: string;
+}
+
 interface SpotifyTokens {
   access_token: string;
   refresh_token: string;
@@ -44,6 +52,7 @@ export function useSpotify() {
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [track, setTrack] = useState<SpotifyTrack | null>(null);
+  const [queue, setQueue] = useState<QueueItem[]>([]);
   const tokensRef = useRef<SpotifyTokens | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastProgressRef = useRef<number>(0);
@@ -143,6 +152,22 @@ export function useSpotify() {
     });
   }, [spotifyApi]);
 
+  const fetchQueue = useCallback(async () => {
+    const data = await spotifyApi('/me/player/queue');
+    if (!data || !Array.isArray(data.queue)) {
+      setQueue([]);
+      return;
+    }
+    const items: QueueItem[] = data.queue.slice(0, 50).map((it: any, i: number) => ({
+      uri: it.uri || `idx-${i}`,
+      id: (it.id || it.uri || `idx-${i}`) + ':' + i,
+      name: it.name || 'Unknown',
+      artist: (it.artists || []).map((a: any) => a.name).join(', ') || '',
+      albumArt: it.album?.images?.[it.album.images.length - 1]?.url || it.album?.images?.[0]?.url || '',
+    }));
+    setQueue(items);
+  }, [spotifyApi]);
+
   // Interpolated progress for smooth sync
   const getInterpolatedProgress = useCallback((): number => {
     if (!track) return 0;
@@ -154,8 +179,14 @@ export function useSpotify() {
   const startPolling = useCallback(() => {
     stopPolling();
     fetchCurrentTrack();
-    pollRef.current = setInterval(fetchCurrentTrack, POLL_INTERVAL);
-  }, [fetchCurrentTrack]);
+    fetchQueue();
+    let n = 0;
+    pollRef.current = setInterval(() => {
+      fetchCurrentTrack();
+      // Queue updates less often to save bandwidth
+      if (++n % 3 === 0) fetchQueue();
+    }, POLL_INTERVAL);
+  }, [fetchCurrentTrack, fetchQueue]);
 
   const stopPolling = useCallback(() => {
     if (pollRef.current) {
@@ -231,8 +262,8 @@ export function useSpotify() {
 
   const next = useCallback(async () => {
     await spotifyApi('/me/player/next', 'POST');
-    setTimeout(fetchCurrentTrack, 500);
-  }, [spotifyApi, fetchCurrentTrack]);
+    setTimeout(() => { fetchCurrentTrack(); fetchQueue(); }, 500);
+  }, [spotifyApi, fetchCurrentTrack, fetchQueue]);
 
   const prev = useCallback(async () => {
     await spotifyApi('/me/player/previous', 'POST');
@@ -266,6 +297,8 @@ export function useSpotify() {
     connected,
     loading,
     track,
+    queue,
+    refreshQueue: fetchQueue,
     connect,
     disconnect,
     play,
