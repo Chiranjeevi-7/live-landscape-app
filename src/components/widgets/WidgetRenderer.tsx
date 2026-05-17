@@ -4,6 +4,7 @@ import DateWidget from './DateWidget';
 import TimerWidget from './TimerWidget';
 import StopwatchWidget from './StopwatchWidget';
 import SpotifyWidget from './SpotifyWidget';
+import SpotifyQueueWidget from './SpotifyQueueWidget';
 import LyricsWidget from './LyricsWidget';
 import GifWidget from './GifWidget';
 import WeatherWidget from './WeatherWidget';
@@ -17,6 +18,7 @@ const WIDGET_MAP: Record<WidgetType, React.ComponentType> = {
   timer: TimerWidget,
   stopwatch: StopwatchWidget,
   spotify: SpotifyWidget,
+  spotifyQueue: SpotifyQueueWidget,
   lyrics: LyricsWidget,
   gif: GifWidget,
   weather: WeatherWidget,
