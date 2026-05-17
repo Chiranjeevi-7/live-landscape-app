@@ -164,7 +164,7 @@ export default function SpotifyQueueWidget() {
   }
 
   return (
-    <div ref={containerRef} className="flex flex-col h-full w-full min-h-0 p-3 gap-2">
+    <div ref={containerRef} className="relative flex flex-col h-full w-full min-h-0 p-3 gap-2">
       {/* Header */}
       <div className="flex items-center justify-between px-1 shrink-0">
         <div className="flex items-center gap-1.5 min-w-0">
