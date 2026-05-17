@@ -242,6 +242,18 @@
     transition: transform 0.4s var(--easing), box-shadow 0.4s var(--easing);
   }
 
+  /* Smooth preset switching */
+  .presets-animating .widget-surface {
+    transition:
+      left 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+      top 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+      width 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+      height 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+      border-radius 0.45s var(--easing),
+      transform 0.4s var(--easing),
+      box-shadow 0.4s var(--easing);
+  }
+
   .widget-surface:active {
     transform: scale(0.97);
     transition-duration: 0.12s;

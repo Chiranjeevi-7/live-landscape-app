@@ -3,11 +3,12 @@ import { useDashboardStore } from '@/hooks/useDashboardStore';
 import AmbientVisualizer from '@/components/AmbientVisualizer';
 import FreeformCanvas from '@/components/FreeformCanvas';
 import WidgetPicker from '@/components/WidgetPicker';
+import LayoutPresetMenu from '@/components/LayoutPresetMenu';
 import { Palette, Lock, Unlock, Plus, Sun, Moon } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
 export default function Dashboard() {
-  const { layout, accentIndex, brightness, updateWidget, addWidget, removeWidget, cycleTheme, setBrightness } = useDashboardStore();
+  const { layout, accentIndex, brightness, updateWidget, addWidget, removeWidget, cycleTheme, setBrightness, setLayout } = useDashboardStore();
   const [showUI, setShowUI] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
@@ -80,6 +81,11 @@ export default function Dashboard() {
         >
           <Palette className="w-4 h-4" />
         </button>
+      </div>
+
+      {/* ─── TOP-RIGHT: Layout presets ─── */}
+      <div onClick={(e) => e.stopPropagation()}>
+        <LayoutPresetMenu layout={layout} setLayout={setLayout} visible={visible} />
       </div>
 
       {/* ─── BOTTOM-LEFT: Brightness slider ─── */}
