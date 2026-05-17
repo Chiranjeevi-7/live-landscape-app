@@ -185,7 +185,7 @@ export default function SpotifyQueueWidget() {
 
       {/* List */}
       <div
-        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden no-scrollbar"
+        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide"
         style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}
         onClick={(e) => e.stopPropagation()}
       >
