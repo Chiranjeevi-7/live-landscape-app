@@ -1,4 +1,4 @@
-export type WidgetType = 'clock' | 'date' | 'timer' | 'stopwatch' | 'spotify' | 'lyrics' | 'gif' | 'weather' | 'pomodoro' | 'notes' | 'lights';
+export type WidgetType = 'clock' | 'date' | 'timer' | 'stopwatch' | 'spotify' | 'spotifyQueue' | 'lyrics' | 'gif' | 'weather' | 'pomodoro' | 'notes' | 'lights';
 
 export type WidgetShape = 'rectangle' | 'rounded' | 'squircle' | 'circle' | 'edge-to-edge';
 
@@ -64,6 +64,7 @@ export const WIDGET_LABELS: Record<WidgetType, string> = {
   timer: 'Timer',
   stopwatch: 'Stopwatch',
   spotify: 'Spotify Player',
+  spotifyQueue: 'Spotify Queue',
   lyrics: 'Lyrics',
   gif: 'GIF / Image',
   weather: 'Weather',
